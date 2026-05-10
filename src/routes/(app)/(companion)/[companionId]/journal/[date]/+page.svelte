@@ -233,6 +233,10 @@
 	let hasDuration = $derived(
 		EVENT_TYPES.find((t) => t.value === selectedType)?.hasDuration ?? false
 	);
+	let siblingCompanions = $derived(
+		data.companions.filter((c) => c.id !== data.companion.id && c.isActive)
+	);
+	let selectedAdditionalIds = $state<string[]>([]);
 
 	let editingActivityId = $state<string | null>(null);
 	let editActivityType = $state('walk');
@@ -771,6 +775,7 @@
 							update();
 							showActivityForm = false;
 							selectedType = 'walk';
+							selectedAdditionalIds = [];
 						}}
 					class="space-y-4"
 				>
@@ -801,6 +806,37 @@
 							{/each}
 						</div>
 					</div>
+					{#if siblingCompanions.length > 0}
+						<fieldset class="space-y-1.5">
+							<legend class="text-sm font-medium text-foreground">
+								{t(locale, 'page.journal.day.alsoLogFor')}
+							</legend>
+							<p class="text-xs text-muted-foreground">
+								{t(locale, 'page.journal.day.alsoLogForHint')}
+							</p>
+							<div class="flex flex-wrap gap-2">
+								{#each siblingCompanions as sibling (sibling.id)}
+									{@const checked = selectedAdditionalIds.includes(sibling.id)}
+									<label class="cursor-pointer">
+										<input
+											type="checkbox"
+											name="additionalCompanionIds"
+											value={sibling.id}
+											bind:group={selectedAdditionalIds}
+											class="sr-only"
+										/>
+										<span
+											class="inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors cursor-pointer {checked
+												? 'bg-primary/10 border-primary/30 text-primary'
+												: 'border-border text-muted-foreground hover:text-foreground'}"
+										>
+											{sibling.name}
+										</span>
+									</label>
+								{/each}
+							</div>
+						</fieldset>
+					{/if}
 					<div class="grid grid-cols-2 gap-4">
 						<div class="space-y-1.5">
 							<label for="act-loggedAt" class="text-sm font-medium text-foreground"
