@@ -2,7 +2,7 @@ import { error, fail, redirect } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
 import { t } from '$lib/i18n';
 import { db, schema } from '$lib/server/db';
-import { eq, and, gte, lt } from 'drizzle-orm';
+import { eq, and, gte, lt, inArray } from 'drizzle-orm';
 import { generateId } from '$lib/server/utils';
 import { parseMood, parseDailyEventType, isValidDate } from '$lib/server/validation';
 import { localDateISO } from '$lib/date';
@@ -88,6 +88,8 @@ export const actions: Actions = {
 
 	addActivity: async ({ params, request, locals }) => {
 		if (!locals.user) return fail(401, { error: t(locals.locale, 'error.unauthorized') });
+		if (locals.user.role === 'caretaker')
+			return fail(403, { error: t(locals.locale, 'error.forbidden') });
 		const { companionId, date } = params;
 		if (!isValidDate(date)) return fail(400, { error: t(locals.locale, 'error.invalidDate') });
 
@@ -100,15 +102,38 @@ export const actions: Actions = {
 
 		if (!type) return fail(400, { error: t(locals.locale, 'error.eventTypeRequired') });
 
-		await db.insert(schema.dailyEvents).values({
+		const additionalIds = data
+			.getAll('additionalCompanionIds')
+			.map((v) => String(v))
+			.filter((v) => v && v !== companionId);
+
+		let validAdditionalIds: string[] = [];
+		if (additionalIds.length > 0) {
+			const rows = await db.query.companions.findMany({
+				where: and(
+					inArray(schema.companions.id, additionalIds),
+					eq(schema.companions.isActive, true)
+				),
+				columns: { id: true }
+			});
+			validAdditionalIds = rows.map((r) => r.id);
+		}
+
+		const targetIds = [companionId, ...validAdditionalIds];
+		const eventGroupId = targetIds.length > 1 ? generateId(15) : null;
+
+		const values = targetIds.map((cid) => ({
 			id: generateId(15),
-			companionId,
+			companionId: cid,
 			type,
 			notes,
 			durationMinutes,
 			loggedAt,
-			loggedBy: locals.user.id
-		});
+			loggedBy: locals.user!.id,
+			eventGroupId
+		}));
+
+		await db.insert(schema.dailyEvents).values(values);
 
 		return { addSuccess: true };
 	},

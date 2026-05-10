@@ -209,11 +209,13 @@ export const dailyEvents = sqliteTable(
 		createdAt: integer('created_at', { mode: 'timestamp' })
 			.notNull()
 			.default(sql`(unixepoch())`),
-		loggedBy: text('logged_by').references(() => users.id, { onDelete: 'set null' })
+		loggedBy: text('logged_by').references(() => users.id, { onDelete: 'set null' }),
+		eventGroupId: text('event_group_id')
 	},
 	(t) => ({
 		companionIdx: index('daily_companion_idx').on(t.companionId),
-		loggedIdx: index('daily_logged_idx').on(t.loggedAt)
+		loggedIdx: index('daily_logged_idx').on(t.loggedAt),
+		groupIdx: index('daily_event_group_idx').on(t.eventGroupId)
 	})
 );
 
