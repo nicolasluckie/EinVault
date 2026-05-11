@@ -49,7 +49,8 @@ export async function validateAuth(event: RequestEvent, { refreshCookie = true }
 			locale: (user.locale ?? 'en') as 'en' | 'it' | 'de' | 'es' | 'fr' | 'pt',
 			email: user.email ?? null,
 			phone: user.phone ?? null,
-			reminderUndoSeconds: user.reminderUndoSeconds ?? null
+			reminderUndoSeconds: user.reminderUndoSeconds ?? null,
+			defaultRecurrenceUnit: user.defaultRecurrenceUnit ?? null
 		}
 	};
 }

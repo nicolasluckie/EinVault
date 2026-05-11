@@ -11,6 +11,7 @@
 	import { Alert, AlertDescription } from '$lib/components/ui/alert/index.js';
 	import CompanionAvatar from '$lib/components/CompanionAvatar.svelte';
 	import ReminderUndoCard from '$lib/components/settings/ReminderUndoCard.svelte';
+	import DefaultRecurrenceCard from '$lib/components/settings/DefaultRecurrenceCard.svelte';
 	import { Pencil, Plus, RotateCcw } from '@lucide/svelte';
 	import { getContext } from 'svelte';
 	import { t, getLocale, SUPPORTED_LOCALES, LOCALE_LABELS } from '$lib/i18n';
@@ -232,6 +233,16 @@
 			: undefined}
 		errorMessage={form?.reminderUndoError}
 	/>
+
+	{#if data.user?.role !== 'caretaker'}
+		<DefaultRecurrenceCard
+			currentValue={data.user?.defaultRecurrenceUnit ?? null}
+			successMessage={form?.defaultRecurrenceSuccess
+				? t(locale, 'page.settings.defaultRecurrenceUpdated')
+				: undefined}
+			errorMessage={form?.defaultRecurrenceError}
+		/>
+	{/if}
 
 	{#if data.companions.length > 0 || data.user?.role !== 'caretaker'}
 		<Card>
