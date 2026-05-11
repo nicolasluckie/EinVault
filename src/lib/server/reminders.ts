@@ -23,21 +23,12 @@ type Reminder = typeof schema.reminders.$inferSelect;
 export function computeNextDueAt(reminder: Reminder): Date | null {
 	if (!reminder.isRecurring) return null;
 
-	// New columns take precedence; fall back to legacy recurringDays for rows
-	// written before PR-2 deployed (or during the dual-write transition).
 	const unit: RecurrenceUnit | null = reminder.recurrenceUnit ?? null;
 	const interval = reminder.recurrenceInterval ?? null;
 	const anchor: RecurrenceAnchor = reminder.recurrenceAnchor ?? 'interval';
 	const anchorValue = reminder.recurrenceAnchorValue;
 
-	if (!unit || !interval || interval < 1) {
-		if (reminder.recurringDays && reminder.recurringDays > 0) {
-			const next = new Date(reminder.dueAt);
-			next.setDate(next.getDate() + reminder.recurringDays);
-			return next;
-		}
-		return null;
-	}
+	if (!unit || !interval || interval < 1) return null;
 
 	const next = new Date(reminder.dueAt);
 
@@ -89,12 +80,6 @@ export function completeReminder(reminder: Reminder, userId: string): void {
 		const nextDueAt = computeNextDueAt(reminder);
 		if (!nextDueAt) return;
 
-		// Preserve the day-mode legacy column during the dual-write transition
-		// so older readers continue to work.
-		const effectiveUnit = reminder.recurrenceUnit ?? 'day';
-		const effectiveInterval = reminder.recurrenceInterval ?? reminder.recurringDays;
-		const legacyDays = effectiveUnit === 'day' ? effectiveInterval : null;
-
 		tx.insert(schema.reminders)
 			.values({
 				id: generateId(15),
@@ -104,7 +89,6 @@ export function completeReminder(reminder: Reminder, userId: string): void {
 				type: reminder.type,
 				dueAt: nextDueAt,
 				isRecurring: true,
-				recurringDays: legacyDays,
 				recurrenceUnit: reminder.recurrenceUnit,
 				recurrenceInterval: reminder.recurrenceInterval,
 				recurrenceAnchor: reminder.recurrenceAnchor,

@@ -238,7 +238,6 @@ export const reminders = sqliteTable(
 		}).notNull(),
 		dueAt: integer('due_at', { mode: 'timestamp' }).notNull(),
 		isRecurring: integer('is_recurring', { mode: 'boolean' }).notNull().default(false),
-		recurringDays: integer('recurring_days'),
 		recurrenceUnit: text('recurrence_unit', { enum: ['day', 'week', 'month', 'year'] }),
 		recurrenceInterval: integer('recurrence_interval'),
 		recurrenceAnchor: text('recurrence_anchor', {

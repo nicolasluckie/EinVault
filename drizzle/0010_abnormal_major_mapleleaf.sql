@@ -1,0 +1,1 @@
+ALTER TABLE `reminders` DROP COLUMN `recurring_days`;

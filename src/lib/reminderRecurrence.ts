@@ -47,8 +47,6 @@ export type ReminderRecurrence = {
 	recurrenceInterval: number | null;
 	recurrenceAnchor: RecurrenceAnchor | null;
 	recurrenceAnchorValue: number | null;
-	// Legacy column kept readable during the dual-write transition.
-	recurringDays: number | null;
 };
 
 /**
@@ -61,14 +59,10 @@ export function formatRecurrence(
 	locale: Locale,
 	variant: 'full' | 'short' = 'full'
 ): string {
-	if (!r.isRecurring) return '';
+	if (!r.isRecurring || !r.recurrenceUnit || !r.recurrenceInterval) return '';
 
-	// Resolve effective unit + interval, falling back to legacy recurringDays
-	// for rows written before the new columns shipped.
-	const unit: RecurrenceUnit =
-		r.recurrenceUnit ?? (r.recurringDays && r.recurringDays > 0 ? 'day' : 'day');
-	const interval = r.recurrenceInterval ?? r.recurringDays ?? 0;
-	if (interval <= 0) return '';
+	const unit: RecurrenceUnit = r.recurrenceUnit;
+	const interval = r.recurrenceInterval;
 
 	if (variant === 'short') {
 		const suffix = unit === 'day' ? 'd' : unit === 'week' ? 'w' : unit === 'month' ? 'mo' : 'y';

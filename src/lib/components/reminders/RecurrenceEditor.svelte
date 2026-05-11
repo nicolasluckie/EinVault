@@ -15,7 +15,6 @@
 	type EditorValue = Pick<
 		Reminder,
 		| 'isRecurring'
-		| 'recurringDays'
 		| 'recurrenceUnit'
 		| 'recurrenceInterval'
 		| 'recurrenceAnchor'
@@ -25,7 +24,6 @@
 	let {
 		value = {
 			isRecurring: false,
-			recurringDays: null,
 			recurrenceUnit: null,
 			recurrenceInterval: null,
 			recurrenceAnchor: null,
@@ -45,10 +43,8 @@
 	// id in the parent, so prop drift after init is not a concern. untrack
 	// keeps Svelte from flagging the reads as missing reactivity.
 	const initial = untrack(() => {
-		const initialUnit: RecurrenceUnit =
-			value.recurrenceUnit ?? (value.recurringDays ? 'day' : (userDefault ?? 'day'));
-		const initialInterval =
-			value.recurrenceInterval ?? value.recurringDays ?? (initialUnit === 'day' ? 30 : 1);
+		const initialUnit: RecurrenceUnit = value.recurrenceUnit ?? userDefault ?? 'day';
+		const initialInterval = value.recurrenceInterval ?? (initialUnit === 'day' ? 30 : 1);
 		const initialAnchor: RecurrenceAnchor = value.recurrenceAnchor ?? 'interval';
 		const yearUnpacked =
 			initialAnchor === 'day_of_year' && value.recurrenceAnchorValue != null
