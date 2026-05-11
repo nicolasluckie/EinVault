@@ -64,6 +64,13 @@
       "when": 1778447342266,
       "tag": "0008_happy_hulk",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "6",
+      "when": 1778498303676,
+      "tag": "0009_outstanding_blazing_skull",
+      "breakpoints": true
     }
   ]
 }
