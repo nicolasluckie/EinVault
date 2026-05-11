@@ -1,4 +1,5 @@
 import type { Locale } from '$lib/i18n';
+import type { RecurrenceUnit } from '$lib/reminderRecurrence';
 
 declare global {
 	namespace App {
@@ -14,6 +15,7 @@ declare global {
 				email: string | null;
 				phone: string | null;
 				reminderUndoSeconds: number | null;
+				defaultRecurrenceUnit: RecurrenceUnit | null;
 			} | null;
 			session: {
 				id: string;

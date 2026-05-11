@@ -2,7 +2,11 @@ import { error, fail, redirect } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
 import { db, schema } from '$lib/server/db';
 import { eq } from 'drizzle-orm';
-import { handleAccountUpdate, handleReminderUndoUpdate } from '$lib/server/account';
+import {
+	handleAccountUpdate,
+	handleReminderUndoUpdate,
+	handleDefaultRecurrenceUpdate
+} from '$lib/server/account';
 import { isSecureRequest } from '$lib/server/auth';
 import { t, SUPPORTED_LOCALES } from '$lib/i18n';
 import type { Locale } from '$lib/i18n';
@@ -94,6 +98,11 @@ export const actions: Actions = {
 	reminderUndo: async ({ request, locals }) => {
 		if (!locals.user) redirect(302, '/auth/login');
 		return handleReminderUndoUpdate(locals.user.id, request, locals.locale);
+	},
+
+	defaultRecurrence: async ({ request, locals }) => {
+		if (!locals.user) redirect(302, '/auth/login');
+		return handleDefaultRecurrenceUpdate(locals.user.id, request, locals.locale);
 	},
 
 	restore: async ({ request, locals }) => {
