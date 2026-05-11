@@ -4,7 +4,7 @@ import { t } from '$lib/i18n';
 import { db, schema } from '$lib/server/db';
 import { eq, and, lt, gt, isNotNull } from 'drizzle-orm';
 import { generateId } from '$lib/server/utils';
-import { parseReminderType } from '$lib/server/validation';
+import { parseReminderType, parseRecurrence } from '$lib/server/validation';
 import { completeReminder } from '$lib/server/reminders';
 
 export const load: PageServerLoad = async ({ params, locals, parent }) => {
@@ -20,7 +20,11 @@ export const load: PageServerLoad = async ({ params, locals, parent }) => {
 		}
 	});
 
-	return { companion, reminders };
+	return {
+		companion,
+		reminders,
+		defaultRecurrenceUnit: locals.user.defaultRecurrenceUnit ?? null
+	};
 };
 
 export const actions: Actions = {
@@ -32,11 +36,14 @@ export const actions: Actions = {
 		const type = parseReminderType(String(data.get('type') ?? ''));
 		const dueAt = new Date(String(data.get('dueAt') ?? ''));
 		const isRecurring = data.get('isRecurring') === 'on';
-		const recurringDays = isRecurring ? parseInt(String(data.get('recurringDays') ?? '0')) : null;
 
 		if (!title) return fail(400, { error: t(locals.locale, 'error.titleRequired') });
 		if (isNaN(dueAt.getTime()))
 			return fail(400, { error: t(locals.locale, 'error.validDueDateRequired') });
+
+		const recurrence = isRecurring ? parseRecurrence(data, dueAt) : null;
+		if (isRecurring && !recurrence)
+			return fail(400, { error: t(locals.locale, 'error.invalidRecurrence') });
 
 		const id = generateId(15);
 		await db.insert(schema.reminders).values({
@@ -47,7 +54,11 @@ export const actions: Actions = {
 			type,
 			dueAt,
 			isRecurring,
-			recurringDays: recurringDays && recurringDays > 0 ? recurringDays : null,
+			recurringDays: recurrence?.unit === 'day' ? recurrence.interval : null,
+			recurrenceUnit: recurrence?.unit ?? null,
+			recurrenceInterval: recurrence?.interval ?? null,
+			recurrenceAnchor: recurrence?.anchor ?? null,
+			recurrenceAnchorValue: recurrence?.anchorValue ?? null,
 			seriesId: isRecurring ? id : null,
 			loggedBy: locals.user.id
 		});
@@ -64,12 +75,15 @@ export const actions: Actions = {
 		const type = parseReminderType(String(data.get('type') ?? ''));
 		const dueAt = new Date(String(data.get('dueAt') ?? ''));
 		const isRecurring = data.get('isRecurring') === 'on';
-		const recurringDays = isRecurring ? parseInt(String(data.get('recurringDays') ?? '0')) : null;
 
 		if (!id) return fail(400, { error: t(locals.locale, 'error.missingId') });
 		if (!title) return fail(400, { error: t(locals.locale, 'error.titleRequired') });
 		if (isNaN(dueAt.getTime()))
 			return fail(400, { error: t(locals.locale, 'error.validDueDateRequired') });
+
+		const recurrence = isRecurring ? parseRecurrence(data, dueAt) : null;
+		if (isRecurring && !recurrence)
+			return fail(400, { error: t(locals.locale, 'error.invalidRecurrence') });
 
 		const existing = await db.query.reminders.findFirst({
 			where: and(eq(schema.reminders.id, id), eq(schema.reminders.companionId, params.companionId)),
@@ -85,7 +99,11 @@ export const actions: Actions = {
 				type,
 				dueAt,
 				isRecurring,
-				recurringDays: recurringDays && recurringDays > 0 ? recurringDays : null
+				recurringDays: recurrence?.unit === 'day' ? recurrence.interval : null,
+				recurrenceUnit: recurrence?.unit ?? null,
+				recurrenceInterval: recurrence?.interval ?? null,
+				recurrenceAnchor: recurrence?.anchor ?? null,
+				recurrenceAnchorValue: recurrence?.anchorValue ?? null
 			})
 			.where(eq(schema.reminders.id, id));
 

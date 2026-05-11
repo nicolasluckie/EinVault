@@ -27,6 +27,7 @@
 	import { t, getLocale } from '$lib/i18n';
 	import { createPendingDismissals } from '$lib/pendingDismiss.svelte';
 	import { registerDismissForm } from '$lib/actions/registerDismissForm';
+	import { formatRecurrence } from '$lib/reminderRecurrence';
 
 	let { data }: { data: PageData } = $props();
 	let {
@@ -247,13 +248,7 @@
 							<span class="w-20 shrink-0 text-xs font-medium text-muted-foreground"
 								>{t(locale, 'page.dashboard.modalLabelRepeats')}</span
 							>
-							<span class="text-foreground"
-								>{r.recurringDays !== 1
-									? t(locale, 'page.dashboard.modalLabelEveryDaysPlural', {
-											count: r.recurringDays ?? 1
-										})
-									: t(locale, 'page.dashboard.modalLabelEveryDays')}</span
-							>
+							<span class="text-foreground">{formatRecurrence(r, locale, 'full')}</span>
 						</div>
 					{/if}
 					{#if r.description}

@@ -36,7 +36,10 @@ export const users = sqliteTable(
 		phone: text('phone'),
 		oidcSubject: text('oidc_subject'),
 		oidcIssuer: text('oidc_issuer'),
-		reminderUndoSeconds: integer('reminder_undo_seconds')
+		reminderUndoSeconds: integer('reminder_undo_seconds'),
+		defaultRecurrenceUnit: text('default_recurrence_unit', {
+			enum: ['day', 'week', 'month', 'year']
+		})
 	},
 	(t) => [uniqueIndex('users_oidc_idx').on(t.oidcIssuer, t.oidcSubject)]
 );
@@ -236,6 +239,12 @@ export const reminders = sqliteTable(
 		dueAt: integer('due_at', { mode: 'timestamp' }).notNull(),
 		isRecurring: integer('is_recurring', { mode: 'boolean' }).notNull().default(false),
 		recurringDays: integer('recurring_days'),
+		recurrenceUnit: text('recurrence_unit', { enum: ['day', 'week', 'month', 'year'] }),
+		recurrenceInterval: integer('recurrence_interval'),
+		recurrenceAnchor: text('recurrence_anchor', {
+			enum: ['interval', 'day_of_week', 'day_of_month', 'day_of_year']
+		}),
+		recurrenceAnchorValue: integer('recurrence_anchor_value'),
 		seriesId: text('series_id'),
 		completedAt: integer('completed_at', { mode: 'timestamp' }),
 		completedBy: text('completed_by').references(() => users.id, { onDelete: 'set null' }),

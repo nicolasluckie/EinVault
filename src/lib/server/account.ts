@@ -18,6 +18,7 @@ import {
 	REMINDER_UNDO_DEFAULT_SENTINEL,
 	REMINDER_UNDO_SECONDS_DEFAULT
 } from '$lib/server/env';
+import { parseRecurrenceUnit } from '$lib/server/validation';
 
 export async function handleAccountUpdate(
 	userId: string,
@@ -124,4 +125,31 @@ export async function handleReminderUndoUpdate(userId: string, request: Request,
 		.where(eq(schema.users.id, userId));
 
 	return { reminderUndoSuccess: true };
+}
+
+export async function handleDefaultRecurrenceUpdate(
+	userId: string,
+	request: Request,
+	locale: Locale
+) {
+	const data = await request.formData();
+	const raw = String(data.get('defaultRecurrenceUnit') ?? '');
+
+	let value: 'day' | 'week' | 'month' | 'year' | null;
+	if (raw === '' || raw === 'system') {
+		value = null;
+	} else {
+		const parsed = parseRecurrenceUnit(raw);
+		if (!parsed) {
+			return fail(400, { defaultRecurrenceError: t(locale, 'error.invalidDefaultRecurrence') });
+		}
+		value = parsed;
+	}
+
+	await db
+		.update(schema.users)
+		.set({ defaultRecurrenceUnit: value })
+		.where(eq(schema.users.id, userId));
+
+	return { defaultRecurrenceSuccess: true };
 }

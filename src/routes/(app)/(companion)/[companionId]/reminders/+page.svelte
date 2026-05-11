@@ -22,11 +22,12 @@
 	import { reminderTypeOptions } from '$lib/i18n/labels';
 	import { createPendingDismissals } from '$lib/pendingDismiss.svelte';
 	import { registerDismissForm } from '$lib/actions/registerDismissForm';
+	import RecurrenceEditor from '$lib/components/reminders/RecurrenceEditor.svelte';
+	import { formatRecurrence } from '$lib/reminderRecurrence';
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
 	const locale = getLocale();
 	let showForm = $state(false);
-	let isRecurring = $state(false);
 	let submitting = $state(false);
 
 	const REMINDER_TYPES = reminderTypeOptions(locale);
@@ -45,7 +46,6 @@
 	}
 
 	let editingId = $state<string | null>(null);
-	let editIsRecurring = $state(false);
 
 	$effect(() => {
 		const editId = page.url.searchParams.get('edit');
@@ -58,7 +58,6 @@
 
 	function startEdit(reminder: (typeof data.reminders)[0]) {
 		editingId = reminder.id;
-		editIsRecurring = reminder.isRecurring;
 	}
 
 	const TYPE_ICONS = REMINDER_TYPES.reduce(
@@ -184,16 +183,12 @@
 							>{t(locale, 'page.reminders.overdue')}</Badge
 						>{/if}
 				</div>
-				{#if r.isRecurring && r.recurringDays}
+				{#if r.isRecurring}
 					<div class="flex items-center gap-3">
 						<span class="w-20 shrink-0 text-xs font-medium text-muted-foreground"
 							>{t(locale, 'page.reminders.detailRepeats')}</span
 						>
-						<span class="text-foreground"
-							>{r.recurringDays !== 1
-								? t(locale, 'page.reminders.detailEveryDaysPlural', { count: r.recurringDays })
-								: t(locale, 'page.reminders.detailEveryDays', { count: r.recurringDays })}</span
-						>
+						<span class="text-foreground">{formatRecurrence(r, locale, 'full')}</span>
 					</div>
 				{/if}
 				{#if r.description}
@@ -343,32 +338,8 @@
 							rows={3}
 						/>
 					</div>
-					<label class="flex items-center gap-2 cursor-pointer">
-						<input
-							id="isRecurring"
-							type="checkbox"
-							name="isRecurring"
-							bind:checked={isRecurring}
-							class="rounded border-input"
-						/>
-						<span class="text-sm text-foreground">{t(locale, 'page.reminders.labelRecurring')}</span
-						>
-					</label>
-					{#if isRecurring}
-						<div class="space-y-1.5 animate-slide-up">
-							<Label for="recurringDays">{t(locale, 'page.reminders.labelRepeatEvery')}</Label>
-							<Input
-								id="recurringDays"
-								name="recurringDays"
-								type="number"
-								min="1"
-								class="max-w-[120px]"
-								placeholder="30"
-								required
-								autocomplete="off"
-							/>
-						</div>
-					{/if}
+					<RecurrenceEditor userDefault={data.defaultRecurrenceUnit} idPrefix="add" />
+
 					<div class="flex gap-3">
 						<Button type="submit" disabled={submitting}>
 							{submitting
@@ -467,36 +438,11 @@
 										rows={3}
 									/>
 								</div>
-								<label class="flex items-center gap-2 cursor-pointer">
-									<input
-										id="edit-isRecurring-{reminder.id}"
-										type="checkbox"
-										name="isRecurring"
-										bind:checked={editIsRecurring}
-										class="rounded border-input"
-									/>
-									<span class="text-sm text-foreground"
-										>{t(locale, 'page.reminders.labelRecurring')}</span
-									>
-								</label>
-								{#if editIsRecurring}
-									<div class="space-y-1.5">
-										<Label for="edit-recurringDays-{reminder.id}"
-											>{t(locale, 'page.reminders.labelRepeatEvery')}</Label
-										>
-										<Input
-											id="edit-recurringDays-{reminder.id}"
-											name="recurringDays"
-											type="number"
-											min="1"
-											class="max-w-[120px]"
-											autocomplete="off"
-											value={reminder.recurringDays ?? ''}
-											placeholder="30"
-											required
-										/>
-									</div>
-								{/if}
+								<RecurrenceEditor
+									value={reminder}
+									userDefault={data.defaultRecurrenceUnit}
+									idPrefix="edit-{reminder.id}"
+								/>
 								<div class="flex gap-3">
 									<Button type="submit" size="sm">{t(locale, 'common.save')}</Button>
 									<Button
@@ -529,8 +475,10 @@
 											{#if overdue}<Badge variant="destructive"
 													>{t(locale, 'page.reminders.overdue')}</Badge
 												>{/if}
-											{#if reminder.isRecurring && reminder.recurringDays}
-												<Badge variant="secondary">Every {reminder.recurringDays}d</Badge>
+											{#if reminder.isRecurring}
+												<Badge variant="secondary"
+													>{formatRecurrence(reminder, locale, 'short')}</Badge
+												>
 											{/if}
 										</div>
 										{#if reminder.description}
@@ -727,36 +675,11 @@
 											rows={3}
 										/>
 									</div>
-									<label class="flex items-center gap-2 cursor-pointer">
-										<input
-											id="edit-isRecurring-{reminder.id}"
-											type="checkbox"
-											name="isRecurring"
-											bind:checked={editIsRecurring}
-											class="rounded border-input"
-										/>
-										<span class="text-sm text-foreground"
-											>{t(locale, 'page.reminders.labelRecurring')}</span
-										>
-									</label>
-									{#if editIsRecurring}
-										<div class="space-y-1.5">
-											<Label for="edit-recurringDays-{reminder.id}"
-												>{t(locale, 'page.reminders.labelRepeatEvery')}</Label
-											>
-											<Input
-												id="edit-recurringDays-{reminder.id}"
-												name="recurringDays"
-												type="number"
-												min="1"
-												class="max-w-[120px]"
-												autocomplete="off"
-												value={reminder.recurringDays ?? ''}
-												placeholder="30"
-												required
-											/>
-										</div>
-									{/if}
+									<RecurrenceEditor
+										value={reminder}
+										userDefault={data.defaultRecurrenceUnit}
+										idPrefix="edit-{reminder.id}"
+									/>
 									<div class="flex gap-3">
 										<Button type="submit" size="sm">{t(locale, 'common.save')}</Button>
 										<Button
