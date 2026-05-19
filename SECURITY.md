@@ -39,21 +39,37 @@ Out of scope:
 
 Published container images at `ghcr.io/davefatkin/einvault` carry both an SLSA build provenance attestation (signed via Sigstore) and an SPDX SBOM, generated automatically by the release workflow.
 
-To verify a release before pulling it into production:
+### Verify the attestation
+
+Using the [GitHub CLI](https://cli.github.com/) (`gh` 2.49 or later):
 
 ```bash
-# Verify SLSA provenance using the GitHub CLI:
 gh attestation verify oci://ghcr.io/davefatkin/einvault:vX.Y.Z \
     --repo davefatkin/EinVault
+```
 
-# Inspect the SBOM bundled with the image:
+The `gh attestation verify` command accepts a tag (`:vX.Y.Z`, `:latest`) or a digest reference (`@sha256:...`).
+
+### Inspect the SBOM
+
+```bash
 docker buildx imagetools inspect \
     ghcr.io/davefatkin/einvault:vX.Y.Z \
     --format '{{ json .SBOM }}'
 ```
 
-Pin deployments to a specific digest rather than a floating tag so that what you verified is what you run:
+### Pin by digest
+
+To pin a deployment to the exact bytes you verified, capture the **image index** digest:
+
+```bash
+docker buildx imagetools inspect ghcr.io/davefatkin/einvault:vX.Y.Z
+```
+
+The `Name:` line at the top contains the image index digest (the multi-arch manifest list). Use that value, with `@sha256:`, in your compose file:
 
 ```yaml
-image: ghcr.io/davefatkin/einvault@sha256:<digest from the verified manifest>
+image: ghcr.io/davefatkin/einvault@sha256:<digest>
 ```
+
+> **Note:** the registry's tag list will show tags of the form `sha256-<digest>` alongside the images. Those are Sigstore attestation artifacts, not images. Pulling one as if it were the application will fail with `unsupported media type application/vnd.oci.empty.v1+json` or similar. Always pin by `@sha256:<digest>` taken from `imagetools inspect`, never by the visually-similar `:sha256-<digest>` tag.
