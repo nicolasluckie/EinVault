@@ -16,6 +16,9 @@ declare global {
 				phone: string | null;
 				reminderUndoSeconds: number | null;
 				defaultRecurrenceUnit: RecurrenceUnit | null;
+				notifyReminderEmail: boolean;
+				notifyShiftEmail: boolean;
+				ntfyTopic: string | null;
 			} | null;
 			session: {
 				id: string;

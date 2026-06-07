@@ -250,6 +250,117 @@ export function logImmichBootStatus(): void {
 	}
 }
 
+// Optional SMTP email (issue #12). Off unless SMTP_HOST and SMTP_FROM are both
+// set (same gating convention as OIDC and Immich). Used for the forgot-password
+// flow; future PRs add reminder notifications on top of the same transport.
+export interface SmtpConfig {
+	host: string;
+	port: number;
+	// true = implicit TLS (typically port 465); false = STARTTLS upgrade (587).
+	secure: boolean;
+	// Auth is optional: unauthenticated LAN relays are common in homelab setups.
+	user: string | null;
+	pass: string | null;
+	// RFC 5322 From, e.g. 'EinVault <einvault@example.com>'.
+	from: string;
+}
+
+const SMTP_REQUIRED_VARS = ['SMTP_HOST', 'SMTP_FROM'] as const;
+
+function readSmtpConfig(): { config: SmtpConfig | null; missing: string[] } {
+	const missing = SMTP_REQUIRED_VARS.filter((name) => !env[name]?.trim());
+	if (missing.length === SMTP_REQUIRED_VARS.length) return { config: null, missing };
+	if (missing.length > 0) return { config: null, missing };
+	return {
+		config: {
+			host: env.SMTP_HOST!.trim(),
+			port: envInt(env.SMTP_PORT, 587),
+			secure: envBool(env.SMTP_SECURE, false),
+			user: env.SMTP_USER?.trim() || null,
+			// Deliberately not trimmed: passwords may legitimately contain
+			// leading/trailing whitespace.
+			pass: env.SMTP_PASS || null,
+			from: env.SMTP_FROM!.trim()
+		},
+		missing: []
+	};
+}
+
+const smtpResult = readSmtpConfig();
+export const SMTP_CONFIG = smtpResult.config;
+
+export function logSmtpBootStatus(): void {
+	if (smtpResult.missing.length > 0 && smtpResult.missing.length < SMTP_REQUIRED_VARS.length) {
+		console.warn(
+			`[mail] Partial SMTP config detected (missing: ${smtpResult.missing.join(', ')}). Email disabled. Set both SMTP_HOST and SMTP_FROM to enable.`
+		);
+		return;
+	}
+	if (SMTP_CONFIG) {
+		console.info(
+			`[mail] SMTP enabled host=${SMTP_CONFIG.host} port=${SMTP_CONFIG.port} secure=${SMTP_CONFIG.secure} auth=${SMTP_CONFIG.user ? 'yes' : 'no'}`
+		);
+		if (!env.ORIGIN) {
+			console.warn(
+				'[mail] ORIGIN is not set; password reset links may carry the wrong origin behind a reverse proxy.'
+			);
+		}
+		if (SMTP_CONFIG.user && !SMTP_CONFIG.pass) {
+			console.warn(
+				'[mail] SMTP_USER is set but SMTP_PASS is empty; auth will use a blank password.'
+			);
+		}
+	}
+}
+
+// Optional ntfy push channel (issue #12). Off unless NTFY_URL is set. The
+// env configures the SERVER only (base URL + optional access token); each
+// user sets their own topic name in Settings -> Notifications. A non-empty
+// topic is that user's opt-in. Per-user topics (instead of one site topic)
+// preserve the caretaker visibility model: a shared topic would broadcast
+// every companion's reminders and every caretaker's schedule to anyone
+// subscribed.
+export interface NtfyConfig {
+	// Server base, e.g. 'https://ntfy.sh' or a self-hosted instance.
+	baseUrl: string;
+	// Optional bearer token (self-hosted ntfy with auth).
+	token: string | null;
+}
+
+function readNtfyConfig(): { config: NtfyConfig | null; invalid: boolean } {
+	const raw = env.NTFY_URL?.trim();
+	if (!raw) return { config: null, invalid: false };
+	try {
+		const url = new URL(raw);
+		return {
+			config: {
+				baseUrl: `${url.origin}${url.pathname.replace(/\/$/, '')}`,
+				token: env.NTFY_TOKEN?.trim() || null
+			},
+			invalid: false
+		};
+	} catch {
+		return { config: null, invalid: true };
+	}
+}
+
+const ntfyResult = readNtfyConfig();
+export const NTFY_CONFIG = ntfyResult.config;
+
+export function logNtfyBootStatus(): void {
+	if (ntfyResult.invalid) {
+		console.warn(
+			`[ntfy] NTFY_URL='${env.NTFY_URL}' is not a valid URL (expected e.g. https://ntfy.sh). ntfy disabled.`
+		);
+		return;
+	}
+	if (NTFY_CONFIG) {
+		console.info(
+			`[ntfy] enabled server=${NTFY_CONFIG.baseUrl} auth=${NTFY_CONFIG.token ? 'yes' : 'no'} (users opt in by setting a topic in Settings)`
+		);
+	}
+}
+
 // 0 = no undo window (instant commit). >0 = seconds before dismissal commits.
 export const REMINDER_UNDO_SECONDS_DEFAULT = Math.min(
 	envNonNegativeInt(env.REMINDER_UNDO_SECONDS, 7),

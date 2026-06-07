@@ -5,8 +5,13 @@ import { eq } from 'drizzle-orm';
 import {
 	handleAccountUpdate,
 	handleReminderUndoUpdate,
-	handleDefaultRecurrenceUpdate
+	handleDefaultRecurrenceUpdate,
+	handleNotificationsUpdate,
+	handleTestEmail,
+	handleTestNtfy
 } from '$lib/server/account';
+import { isMailEnabled } from '$lib/server/mail';
+import { isNtfyEnabled } from '$lib/server/notify/ntfy';
 import { isSecureRequest } from '$lib/server/auth';
 import { t, SUPPORTED_LOCALES } from '$lib/i18n';
 import type { Locale } from '$lib/i18n';
@@ -35,7 +40,9 @@ export const load: PageServerLoad = async ({ locals }) => {
 		user: locals.user,
 		companions,
 		archivedCompanions,
-		reminderUndoDefault: REMINDER_UNDO_SECONDS_DEFAULT
+		reminderUndoDefault: REMINDER_UNDO_SECONDS_DEFAULT,
+		mailEnabled: isMailEnabled(),
+		ntfyEnabled: isNtfyEnabled()
 	};
 };
 
@@ -103,6 +110,21 @@ export const actions: Actions = {
 	defaultRecurrence: async ({ request, locals }) => {
 		if (!locals.user) redirect(302, '/auth/login');
 		return handleDefaultRecurrenceUpdate(locals.user.id, request, locals.locale);
+	},
+
+	notifications: async ({ request, locals }) => {
+		if (!locals.user) redirect(302, '/auth/login');
+		return handleNotificationsUpdate(locals.user.id, request, locals.locale);
+	},
+
+	testEmail: async ({ locals }) => {
+		if (!locals.user) redirect(302, '/auth/login');
+		return handleTestEmail(locals.user, locals.locale);
+	},
+
+	testNtfy: async ({ locals }) => {
+		if (!locals.user) redirect(302, '/auth/login');
+		return handleTestNtfy(locals.user, locals.locale);
 	},
 
 	restore: async ({ request, locals }) => {

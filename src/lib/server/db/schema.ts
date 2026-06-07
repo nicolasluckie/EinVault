@@ -39,9 +39,21 @@ export const users = sqliteTable(
 		reminderUndoSeconds: integer('reminder_undo_seconds'),
 		defaultRecurrenceUnit: text('default_recurrence_unit', {
 			enum: ['day', 'week', 'month', 'year']
-		})
+		}),
+		notifyReminderEmail: integer('notify_reminder_email', { mode: 'boolean' })
+			.notNull()
+			.default(false),
+		notifyShiftEmail: integer('notify_shift_email', { mode: 'boolean' }).notNull().default(false),
+		// ntfy topic name on the site-configured server (env NTFY_URL). A
+		// non-empty topic is the opt-in for push notifications; the user
+		// receives both categories (reminders, shift alerts) within their
+		// role's visibility scope. Null = no pushes.
+		ntfyTopic: text('ntfy_topic')
 	},
-	(t) => [uniqueIndex('users_oidc_idx').on(t.oidcIssuer, t.oidcSubject)]
+	(t) => [
+		uniqueIndex('users_oidc_idx').on(t.oidcIssuer, t.oidcSubject),
+		uniqueIndex('users_email_idx').on(t.email)
+	]
 );
 
 export const sessions = sqliteTable(
@@ -58,6 +70,62 @@ export const sessions = sqliteTable(
 		oidcIdTokenHint: text('oidc_id_token_hint')
 	},
 	(t) => [index('session_user_idx').on(t.userId)]
+);
+
+export const passwordResetTokens = sqliteTable(
+	'password_reset_tokens',
+	{
+		// sha256 hex of the raw token — same storage pattern as sessions.id, so a
+		// DB leak never exposes a usable token.
+		id: text('id').primaryKey(),
+		userId: text('user_id')
+			.notNull()
+			.references(() => users.id, { onDelete: 'cascade' }),
+		expiresAt: integer('expires_at', { mode: 'timestamp' }).notNull(),
+		createdAt: integer('created_at', { mode: 'timestamp' })
+			.notNull()
+			.default(sql`(unixepoch())`)
+	},
+	(t) => [index('password_reset_user_idx').on(t.userId)]
+);
+
+// Notification outbox (issue #12). Detection (the scheduler's producers) and
+// delivery (the drain) are decoupled through this table so a crash, restart,
+// or SMTP outage never silently drops a notification. The unique dedupe key
+// makes producers idempotent across overlapping scans and restarts.
+export type OutboxPayload =
+	| { kind: 'reminderDue'; reminderId: string; dueAtEpoch: number }
+	| { kind: 'shiftStart'; shiftId: string; boundaryEpoch: number }
+	| { kind: 'shiftEnd'; shiftId: string; boundaryEpoch: number };
+
+export const notificationOutbox = sqliteTable(
+	'notification_outbox',
+	{
+		id: text('id').primaryKey(),
+		// reminder: 'reminder:{reminderId}:{dueAtEpochSeconds}:{userId}:{channel}'
+		// shift:    'shift:{shiftId}:{start|end}:{boundaryEpochSeconds}:{userId}:{channel}'
+		// One row per occurrence per recipient per channel.
+		dedupeKey: text('dedupe_key').notNull(),
+		userId: text('user_id')
+			.notNull()
+			.references(() => users.id, { onDelete: 'cascade' }),
+		channel: text('channel', { enum: ['email', 'ntfy', 'apprise'] }).notNull(),
+		// Rendering happens at send time in the recipient's locale; the payload
+		// carries ids only.
+		payload: text('payload', { mode: 'json' }).$type<OutboxPayload>().notNull(),
+		// queued -> claimed -> sent | skipped | failed; claimed rows orphaned by a
+		// crash are reset to queued at boot. skipped = conditions no longer hold
+		// (reminder completed, user opted out, shift already started) — not an error.
+		status: text('status', { enum: ['queued', 'claimed', 'sent', 'skipped', 'failed'] })
+			.notNull()
+			.default('queued'),
+		attempts: integer('attempts').notNull().default(0),
+		createdAt: integer('created_at', { mode: 'timestamp' })
+			.notNull()
+			.default(sql`(unixepoch())`),
+		sentAt: integer('sent_at', { mode: 'timestamp' })
+	},
+	(t) => [uniqueIndex('outbox_dedupe_idx').on(t.dedupeKey), index('outbox_status_idx').on(t.status)]
 );
 
 // companions
@@ -330,6 +398,8 @@ export const caretakerShifts = sqliteTable(
 
 export type User = typeof users.$inferSelect;
 export type Session = typeof sessions.$inferSelect;
+export type PasswordResetToken = typeof passwordResetTokens.$inferSelect;
+export type NotificationOutboxRow = typeof notificationOutbox.$inferSelect;
 export type Companion = typeof companions.$inferSelect;
 export type JournalEntry = typeof journalEntries.$inferSelect;
 export type JournalPhoto = typeof journalPhotos.$inferSelect;
@@ -346,8 +416,18 @@ export const sessionsRelations = relations(sessions, ({ one }) => ({
 	user: one(users, { fields: [sessions.userId], references: [users.id] })
 }));
 
+export const passwordResetTokensRelations = relations(passwordResetTokens, ({ one }) => ({
+	user: one(users, { fields: [passwordResetTokens.userId], references: [users.id] })
+}));
+
+export const notificationOutboxRelations = relations(notificationOutbox, ({ one }) => ({
+	user: one(users, { fields: [notificationOutbox.userId], references: [users.id] })
+}));
+
 export const usersRelations = relations(users, ({ many }) => ({
 	sessions: many(sessions),
+	passwordResetTokens: many(passwordResetTokens),
+	notificationOutbox: many(notificationOutbox),
 	companionCaretakers: many(companionCaretakers),
 	shifts: many(caretakerShifts),
 	loggedJournalEntries: many(journalEntries),

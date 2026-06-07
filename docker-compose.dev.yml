@@ -70,6 +70,20 @@ services:
       IMMICH_API_KEY: ${IMMICH_API_KEY:-}
       IMMICH_ALBUM_ID: ${IMMICH_ALBUM_ID:-}
 
+      # Optional: SMTP email. Enables outbound mail and the "Forgot password?"
+      # flow. Disabled unless SMTP_HOST and SMTP_FROM are both set.
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_SECURE: ${SMTP_SECURE:-false}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASS: ${SMTP_PASS:-}
+      SMTP_FROM: ${SMTP_FROM:-}
+
+      # Optional: ntfy push notifications. Server config only; users set
+      # their own topic in Settings. Disabled unless NTFY_URL is set.
+      NTFY_URL: ${NTFY_URL:-}
+      NTFY_TOKEN: ${NTFY_TOKEN:-}
+
     security_opt:
       - no-new-privileges:true
     cap_drop:

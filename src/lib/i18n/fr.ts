@@ -91,12 +91,18 @@ const messages: Record<keyof Messages, string> = {
 	'error.passwordTooLong': 'Le mot de passe doit comporter au plus 128 caractères.',
 	'error.passwordsMismatch': 'Les mots de passe ne correspondent pas.',
 	'error.usernameAlreadyTaken': "Nom d'utilisateur déjà pris.",
+	'error.emailAlreadyTaken': 'Cette adresse e-mail est déjà utilisée.',
+	'error.emailRequired': "L'adresse e-mail est requise.",
+	'error.emailInvalid': 'Saisissez une adresse e-mail valide.',
+	'error.tooManyResetRequests': 'Trop de demandes. Réessayez plus tard.',
 	'error.invalidTheme': 'Thème invalide.',
 	'error.invalidLocale': 'Langue invalide.',
 	'error.invalidReminderUndo': "Valeur de fenêtre d'annulation invalide.",
 	'error.invalidRecurrence': 'Configuration de récurrence invalide.',
 	'error.invalidDefaultRecurrence': 'Unité de récurrence par défaut invalide.',
 	'error.invalidRole': 'Rôle invalide.',
+	'error.invalidNtfyTopic':
+		'Le sujet ne peut contenir que des lettres, chiffres, tirets et tirets bas (max. 64).',
 	'error.invalidDate': 'Date invalide',
 	'error.invalidArchiveDate': "Date d'archivage invalide.",
 	'error.invalidCompanionIds': 'Un ou plusieurs identifiants de compagnon sont invalides.',
@@ -232,6 +238,26 @@ const messages: Record<keyof Messages, string> = {
 	'page.settings.defaultRecurrenceLabel': 'Unité par défaut',
 	'page.settings.defaultRecurrenceSystem': 'Utiliser la valeur par défaut (jours)',
 	'page.settings.defaultRecurrenceUpdated': '✓ Récurrence par défaut mise à jour.',
+	'page.settings.notificationsCard': 'Notifications',
+	'page.settings.notificationsDescription':
+		"Recevez des e-mails d'EinVault. Les soignants ne sont notifiés que des rappels des compagnons qui leur sont assignés.",
+	'page.settings.notifyReminderEmailLabel': "M'envoyer un e-mail quand un rappel est dû",
+	'page.settings.notifyShiftEmailLabel':
+		"M'envoyer un e-mail 24 heures avant le début ou la fin d'une garde",
+	'page.settings.notificationsUpdated': 'Réglages de notification mis à jour.',
+	'page.settings.notificationsNeedEmail':
+		'Ajoutez une adresse e-mail à votre compte pour recevoir des notifications par e-mail.',
+	'page.settings.ntfyTopicLabel': 'Sujet ntfy',
+	'page.settings.ntfyTopicHint':
+		"Les notifications push couvrent les rappels dus et les alertes de garde pour ce que vous pouvez voir dans EinVault. Elles sont envoyées à ce sujet sur le serveur ntfy configuré par votre administrateur. Choisissez un nom long et aléatoire ; quiconque le connaît peut s'y abonner. Laissez vide pour désactiver les push.",
+	'page.settings.testEmail': 'Envoyer un e-mail de test',
+	'page.settings.testNtfy': 'Envoyer un push de test',
+	'page.settings.testSent': 'Notification de test envoyée.',
+	'page.settings.testFailed': 'Échec du test : {error}',
+	'error.testCooldown': "Attendez quelques secondes avant d'envoyer un autre test.",
+	'email.test.subject': 'Notification de test EinVault',
+	'email.test.body':
+		"Ceci est une notification de test d'EinVault. Si vous lisez ceci, vos réglages de notification fonctionnent.",
 
 	// Page: Login
 	'page.login.title': 'Se connecter',
@@ -242,6 +268,28 @@ const messages: Record<keyof Messages, string> = {
 	'page.login.passwordLabel': 'Mot de passe',
 	'page.login.signIn': 'Se connecter',
 	'page.login.signingIn': 'Connexion…',
+	'page.login.forgotPassword': 'Mot de passe oublié ?',
+
+	// Page: Forgot password
+	'page.forgot.title': 'Réinitialiser votre mot de passe',
+	'page.forgot.instruction':
+		'Saisissez l’adresse e-mail de votre compte et nous vous enverrons un lien pour réinitialiser votre mot de passe.',
+	'page.forgot.emailLabel': 'E-mail',
+	'page.forgot.submit': 'Envoyer le lien',
+	'page.forgot.sending': 'Envoi…',
+	'page.forgot.success': 'Si un compte existe avec cet e-mail, un lien a été envoyé.',
+	'page.forgot.backToLogin': 'Retour à la connexion',
+
+	// Page: Reset password
+	'page.reset.title': 'Choisir un nouveau mot de passe',
+	'page.reset.newPasswordLabel': 'Nouveau mot de passe',
+	'page.reset.confirmPasswordLabel': 'Confirmer le nouveau mot de passe',
+	'page.reset.submit': 'Enregistrer le nouveau mot de passe',
+	'page.reset.saving': 'Enregistrement…',
+	'page.reset.success':
+		'Votre mot de passe a été mis à jour. Vous pouvez maintenant vous connecter.',
+	'page.reset.invalid': 'Ce lien est invalide ou a expiré.',
+	'page.reset.requestNew': 'Demander un nouveau lien',
 
 	// Page: Setup
 	'page.setup.title': 'Configuration',
@@ -710,6 +758,31 @@ const messages: Record<keyof Messages, string> = {
 	'aria.previousMedia': 'Média précédent',
 	'aria.nextMedia': 'Média suivant',
 	'aria.viewPhoto': 'Voir la photo de {name}',
+
+	// Email: password reset
+	'email.reset.subject': 'Réinitialisez votre mot de passe EinVault',
+	'email.reset.greeting': 'Bonjour {name},',
+	'email.reset.body':
+		'Une réinitialisation de mot de passe a été demandée pour votre compte EinVault ({username}). Utilisez le lien ci-dessous pour choisir un nouveau mot de passe. Le lien expire dans 30 minutes.',
+	'email.reset.cta': 'Réinitialiser le mot de passe',
+	'email.reset.ignore': "Si vous n'êtes pas à l'origine de cette demande, ignorez cet e-mail.",
+
+	// Email: reminder due
+	'email.reminder.subject': 'Rappel : {title}',
+	'email.reminder.greeting': 'Bonjour {name},',
+	'email.reminder.body': '{companion} a un rappel à échéance : {title}',
+	'email.reminder.dueLine': 'Échéance : {due}',
+	'email.reminder.cta': 'Ouvrir EinVault',
+	'email.reminder.footer':
+		'Vous recevez cet e-mail car les notifications de rappel sont activées dans vos réglages EinVault.',
+
+	// Email: caretaker shift alerts
+	'email.shift.startSubject': 'Garde bientôt commencée : {caretaker}',
+	'email.shift.endSubject': 'Garde bientôt terminée : {caretaker}',
+	'email.shift.startBody': '{caretaker} commence une garde le {start}.',
+	'email.shift.endBody': '{caretaker} termine une garde le {end}.',
+	'email.shift.footer':
+		'Vous recevez cet e-mail car les notifications de garde sont activées dans vos réglages EinVault.',
 
 	// Immich picker
 	'immich.picker.title': 'Choisir depuis Immich',

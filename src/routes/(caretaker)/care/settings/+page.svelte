@@ -10,6 +10,7 @@
 	import { Alert, AlertDescription } from '$lib/components/ui/alert/index.js';
 	import LocalTime from '$lib/components/LocalTime.svelte';
 	import ReminderUndoCard from '$lib/components/settings/ReminderUndoCard.svelte';
+	import NotificationsCard from '$lib/components/settings/NotificationsCard.svelte';
 	import { Calendar } from '@lucide/svelte';
 	import { SvelteDate } from 'svelte/reactivity';
 	import { t, getLocale, SUPPORTED_LOCALES, LOCALE_LABELS, type MessageKey } from '$lib/i18n';
@@ -267,6 +268,25 @@
 			: undefined}
 		errorMessage={form?.reminderUndoError}
 	/>
+
+	{#if data.mailEnabled || data.ntfyEnabled}
+		<NotificationsCard
+			reminderEnabled={data.user?.notifyReminderEmail ?? false}
+			shiftEnabled={data.user?.notifyShiftEmail ?? false}
+			hasEmail={Boolean(data.user?.email)}
+			mailEnabled={data.mailEnabled}
+			ntfyEnabled={data.ntfyEnabled}
+			ntfyTopic={data.user?.ntfyTopic ?? null}
+			successMessage={form?.notificationsSuccess
+				? t(locale, 'page.settings.notificationsUpdated')
+				: undefined}
+			errorMessage={form?.notificationsError}
+			testSuccessMessage={form?.notificationsTestSuccess
+				? t(locale, 'page.settings.testSent')
+				: undefined}
+			testErrorMessage={form?.notificationsTestError}
+		/>
+	{/if}
 
 	<!-- My Shifts -->
 	<Card id="shifts">

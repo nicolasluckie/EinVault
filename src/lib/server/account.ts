@@ -18,7 +18,10 @@ import {
 	REMINDER_UNDO_DEFAULT_SENTINEL,
 	REMINDER_UNDO_SECONDS_DEFAULT
 } from '$lib/server/env';
-import { parseRecurrenceUnit } from '$lib/server/validation';
+import { parseRecurrenceUnit, EMAIL_RE } from '$lib/server/validation';
+import { NTFY_TOPIC_RE, isNtfyEnabled, sendNtfy } from '$lib/server/notify/ntfy';
+import { isMailEnabled, sendMail } from '$lib/server/mail';
+import { buildTestEmail } from '$lib/server/mail/templates';
 
 export async function handleAccountUpdate(
 	userId: string,
@@ -31,7 +34,10 @@ export async function handleAccountUpdate(
 	const username = String(data.get('username') ?? '')
 		.trim()
 		.toLowerCase();
-	const email = String(data.get('email') ?? '').trim() || null;
+	const email =
+		String(data.get('email') ?? '')
+			.trim()
+			.toLowerCase() || null;
 	const phone = String(data.get('phone') ?? '').trim() || null;
 	const currentPassword = String(data.get('currentPassword') ?? '');
 	const newPassword = String(data.get('newPassword') ?? '');
@@ -51,6 +57,18 @@ export async function handleAccountUpdate(
 	});
 	if (existing && existing.id !== userId) {
 		return fail(400, { accountError: t(locale, 'error.usernameAlreadyTakenAccount') });
+	}
+
+	if (email) {
+		if (!EMAIL_RE.test(email)) {
+			return fail(400, { accountError: t(locale, 'error.emailInvalid') });
+		}
+		const emailConflict = await db.query.users.findFirst({
+			where: eq(schema.users.email, email)
+		});
+		if (emailConflict && emailConflict.id !== userId) {
+			return fail(400, { accountError: t(locale, 'error.emailAlreadyTaken') });
+		}
 	}
 
 	const updates: Partial<typeof schema.users.$inferInsert> = {
@@ -84,7 +102,18 @@ export async function handleAccountUpdate(
 		updates.passwordHash = await bcrypt.hash(newPassword, 12);
 	}
 
-	await db.update(schema.users).set(updates).where(eq(schema.users.id, userId));
+	try {
+		await db.update(schema.users).set(updates).where(eq(schema.users.id, userId));
+	} catch (err) {
+		if (
+			err instanceof Error &&
+			(err as Error & { code?: string }).code === 'SQLITE_CONSTRAINT_UNIQUE' &&
+			err.message.includes('users.email')
+		) {
+			return fail(400, { accountError: t(locale, 'error.emailAlreadyTaken') });
+		}
+		throw err;
+	}
 
 	if (updates.passwordHash) {
 		await invalidateAllUserSessions(userId);
@@ -152,4 +181,104 @@ export async function handleDefaultRecurrenceUpdate(
 		.where(eq(schema.users.id, userId));
 
 	return { defaultRecurrenceSuccess: true };
+}
+
+export async function handleNotificationsUpdate(userId: string, request: Request, locale: Locale) {
+	const data = await request.formData();
+	const notifyReminderEmail = data.get('notifyReminderEmail') === 'on';
+	const notifyShiftEmail = data.get('notifyShiftEmail') === 'on';
+	const rawTopic = String(data.get('ntfyTopic') ?? '').trim();
+	const ntfyTopic = rawTopic || null;
+
+	if (ntfyTopic && !NTFY_TOPIC_RE.test(ntfyTopic)) {
+		return fail(400, { notificationsError: t(locale, 'error.invalidNtfyTopic') });
+	}
+
+	await db
+		.update(schema.users)
+		.set({ notifyReminderEmail, notifyShiftEmail, ntfyTopic })
+		.where(eq(schema.users.id, userId));
+
+	return { notificationsSuccess: true };
+}
+
+// Test sends are immediate (not via the outbox) so the user gets instant
+// feedback. Light per-user cooldown to keep a stuck double-click from
+// hammering SMTP or ntfy. Only successful sends stamp the cooldown: a user
+// debugging a broken config gets to retry immediately. In-process state,
+// single-instance assumption.
+const TEST_COOLDOWN_MS = 10 * 1000;
+const lastTestAt = new Map<string, number>();
+
+function testOnCooldown(key: string): boolean {
+	return Date.now() - (lastTestAt.get(key) ?? 0) < TEST_COOLDOWN_MS;
+}
+
+function stampTestCooldown(key: string): void {
+	lastTestAt.set(key, Date.now());
+}
+
+export async function handleTestEmail(
+	user: { id: string; displayName: string; email: string | null; locale: Locale },
+	locale: Locale
+) {
+	if (!isMailEnabled() || !user.email) {
+		return fail(400, {
+			notificationsTestError: t(locale, 'page.settings.testFailed', {
+				error: 'email unavailable'
+			})
+		});
+	}
+	if (testOnCooldown(`${user.id}:email`)) {
+		return fail(429, { notificationsTestError: t(locale, 'error.testCooldown') });
+	}
+	try {
+		await sendMail(
+			buildTestEmail(user.locale, { displayName: user.displayName, email: user.email })
+		);
+	} catch (err) {
+		// Full detail to the server log only. nodemailer messages can embed the
+		// SMTP host:port; surface just the error-code class (EAUTH, ECONNECTION,
+		// ...) to the client, which is host-free and still useful for debugging.
+		console.error(`[mail] test email for user ${user.id} failed:`, err);
+		const code = (err as { code?: string } | null)?.code ?? 'send failed';
+		return fail(502, {
+			notificationsTestError: t(locale, 'page.settings.testFailed', { error: code })
+		});
+	}
+	stampTestCooldown(`${user.id}:email`);
+	return { notificationsTestSuccess: true };
+}
+
+export async function handleTestNtfy(
+	user: { id: string; displayName: string; ntfyTopic: string | null; locale: Locale },
+	locale: Locale
+) {
+	// locals.user is selected fresh per request, same trust as email above.
+	if (!isNtfyEnabled() || !user.ntfyTopic) {
+		return fail(400, {
+			notificationsTestError: t(locale, 'page.settings.testFailed', {
+				error: 'ntfy unavailable'
+			})
+		});
+	}
+	if (testOnCooldown(`${user.id}:ntfy`)) {
+		return fail(429, { notificationsTestError: t(locale, 'error.testCooldown') });
+	}
+	try {
+		await sendNtfy(user.ntfyTopic, {
+			title: t(user.locale, 'email.test.subject'),
+			message: t(user.locale, 'email.test.body')
+		});
+	} catch (err) {
+		// sendNtfy errors are host-free (HTTP status, or undici's opaque "fetch
+		// failed"); safe to surface, but log full detail server-side too.
+		console.error(`[ntfy] test push for user ${user.id} failed:`, err);
+		const msg = err instanceof Error ? err.message : String(err);
+		return fail(502, {
+			notificationsTestError: t(locale, 'page.settings.testFailed', { error: msg })
+		});
+	}
+	stampTestCooldown(`${user.id}:ntfy`);
+	return { notificationsTestSuccess: true };
 }

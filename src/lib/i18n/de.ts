@@ -91,12 +91,18 @@ const messages: Record<keyof Messages, string> = {
 	'error.passwordTooLong': 'Das Passwort darf höchstens 128 Zeichen lang sein.',
 	'error.passwordsMismatch': 'Die Passwörter stimmen nicht überein.',
 	'error.usernameAlreadyTaken': 'Benutzername bereits vergeben.',
+	'error.emailAlreadyTaken': 'Diese E-Mail-Adresse wird bereits verwendet.',
+	'error.emailRequired': 'E-Mail-Adresse ist erforderlich.',
+	'error.emailInvalid': 'Gib eine gültige E-Mail-Adresse ein.',
+	'error.tooManyResetRequests': 'Zu viele Anfragen. Versuche es später erneut.',
 	'error.invalidTheme': 'Ungültiges Design.',
 	'error.invalidLocale': 'Ungültige Sprache.',
 	'error.invalidReminderUndo': 'Ungültiger Wert für Rückgängig-Fenster.',
 	'error.invalidRecurrence': 'Ungültige Wiederholungskonfiguration.',
 	'error.invalidDefaultRecurrence': 'Ungültige Standard-Wiederholungseinheit.',
 	'error.invalidRole': 'Ungültige Rolle.',
+	'error.invalidNtfyTopic':
+		'Das Thema darf nur Buchstaben, Zahlen, Binde- und Unterstriche enthalten (max. 64).',
 	'error.invalidDate': 'Ungültiges Datum',
 	'error.invalidArchiveDate': 'Ungültiges Archivierungsdatum.',
 	'error.invalidCompanionIds': 'Eine oder mehrere Begleiter-IDs sind ungültig.',
@@ -234,6 +240,26 @@ const messages: Record<keyof Messages, string> = {
 	'page.settings.defaultRecurrenceLabel': 'Standardeinheit',
 	'page.settings.defaultRecurrenceSystem': 'System-Standard verwenden (Tage)',
 	'page.settings.defaultRecurrenceUpdated': '✓ Standard-Wiederholung aktualisiert.',
+	'page.settings.notificationsCard': 'Benachrichtigungen',
+	'page.settings.notificationsDescription':
+		'Erhalte E-Mails von EinVault. Betreuer werden nur über Erinnerungen für zugewiesene Gefährten benachrichtigt.',
+	'page.settings.notifyReminderEmailLabel': 'E-Mail senden, wenn eine Erinnerung fällig ist',
+	'page.settings.notifyShiftEmailLabel':
+		'E-Mail senden, 24 Stunden bevor eine Schicht beginnt oder endet',
+	'page.settings.notificationsUpdated': 'Benachrichtigungseinstellungen aktualisiert.',
+	'page.settings.notificationsNeedEmail':
+		'Füge deinem Konto eine E-Mail-Adresse hinzu, um E-Mail-Benachrichtigungen zu erhalten.',
+	'page.settings.ntfyTopicLabel': 'ntfy-Thema',
+	'page.settings.ntfyTopicHint':
+		'Push-Nachrichten umfassen fällige Erinnerungen und Schichtmeldungen für das, was du in EinVault sehen kannst. Sie gehen an dieses Thema auf dem vom Admin konfigurierten ntfy-Server. Wähle einen langen zufälligen Namen; jeder, der ihn kennt, kann ihn abonnieren. Leer lassen, um Push zu deaktivieren.',
+	'page.settings.testEmail': 'Test-E-Mail senden',
+	'page.settings.testNtfy': 'Test-Push senden',
+	'page.settings.testSent': 'Testbenachrichtigung gesendet.',
+	'page.settings.testFailed': 'Test fehlgeschlagen: {error}',
+	'error.testCooldown': 'Warte ein paar Sekunden, bevor du einen weiteren Test sendest.',
+	'email.test.subject': 'EinVault-Testbenachrichtigung',
+	'email.test.body':
+		'Dies ist eine Testbenachrichtigung von EinVault. Wenn du das liest, funktionieren deine Benachrichtigungseinstellungen.',
 
 	// Page: Login
 	'page.login.title': 'Anmelden',
@@ -244,6 +270,27 @@ const messages: Record<keyof Messages, string> = {
 	'page.login.passwordLabel': 'Passwort',
 	'page.login.signIn': 'Anmelden',
 	'page.login.signingIn': 'Anmeldung…',
+	'page.login.forgotPassword': 'Passwort vergessen?',
+
+	// Page: Forgot password
+	'page.forgot.title': 'Passwort zurücksetzen',
+	'page.forgot.instruction':
+		'Gib die E-Mail-Adresse deines Kontos ein und wir senden dir einen Link zum Zurücksetzen deines Passworts.',
+	'page.forgot.emailLabel': 'E-Mail',
+	'page.forgot.submit': 'Link senden',
+	'page.forgot.sending': 'Wird gesendet…',
+	'page.forgot.success': 'Falls ein Konto mit dieser E-Mail existiert, wurde ein Link gesendet.',
+	'page.forgot.backToLogin': 'Zurück zur Anmeldung',
+
+	// Page: Reset password
+	'page.reset.title': 'Neues Passwort wählen',
+	'page.reset.newPasswordLabel': 'Neues Passwort',
+	'page.reset.confirmPasswordLabel': 'Neues Passwort bestätigen',
+	'page.reset.submit': 'Neues Passwort speichern',
+	'page.reset.saving': 'Wird gespeichert…',
+	'page.reset.success': 'Dein Passwort wurde aktualisiert. Du kannst dich jetzt anmelden.',
+	'page.reset.invalid': 'Dieser Link ist ungültig oder abgelaufen.',
+	'page.reset.requestNew': 'Neuen Link anfordern',
 
 	// Page: Setup
 	'page.setup.title': 'Einrichtung',
@@ -709,6 +756,31 @@ const messages: Record<keyof Messages, string> = {
 	'aria.previousMedia': 'Vorheriges Medium',
 	'aria.nextMedia': 'Nächstes Medium',
 	'aria.viewPhoto': '{name}s Foto anzeigen',
+
+	// Email: password reset
+	'email.reset.subject': 'Setze dein EinVault-Passwort zurück',
+	'email.reset.greeting': 'Hallo {name},',
+	'email.reset.body':
+		'Für dein EinVault-Konto ({username}) wurde ein Zurücksetzen des Passworts angefordert. Nutze den folgenden Link, um ein neues Passwort zu wählen. Der Link läuft in 30 Minuten ab.',
+	'email.reset.cta': 'Passwort zurücksetzen',
+	'email.reset.ignore': 'Falls du das nicht angefordert hast, kannst du diese E-Mail ignorieren.',
+
+	// Email: reminder due
+	'email.reminder.subject': 'Erinnerung: {title}',
+	'email.reminder.greeting': 'Hallo {name},',
+	'email.reminder.body': 'Für {companion} ist eine Erinnerung fällig: {title}',
+	'email.reminder.dueLine': 'Fällig: {due}',
+	'email.reminder.cta': 'EinVault öffnen',
+	'email.reminder.footer':
+		'Du erhältst diese E-Mail, weil Erinnerungs-Benachrichtigungen in deinen EinVault-Einstellungen aktiviert sind.',
+
+	// Email: caretaker shift alerts
+	'email.shift.startSubject': 'Schicht beginnt bald: {caretaker}',
+	'email.shift.endSubject': 'Schicht endet bald: {caretaker}',
+	'email.shift.startBody': '{caretaker} beginnt eine Betreuungsschicht am {start}.',
+	'email.shift.endBody': '{caretaker} beendet eine Betreuungsschicht am {end}.',
+	'email.shift.footer':
+		'Du erhältst diese E-Mail, weil Schicht-Benachrichtigungen in deinen EinVault-Einstellungen aktiviert sind.',
 
 	// Immich picker
 	'immich.picker.title': 'Aus Immich auswählen',

@@ -88,12 +88,18 @@ const messages = {
 	'error.passwordTooLong': 'Password must be 128 characters or fewer.',
 	'error.passwordsMismatch': 'Passwords do not match.',
 	'error.usernameAlreadyTaken': 'Username already taken.',
+	'error.emailAlreadyTaken': 'That email address is already in use.',
+	'error.emailRequired': 'Email address is required.',
+	'error.emailInvalid': 'Enter a valid email address.',
+	'error.tooManyResetRequests': 'Too many reset requests. Try again later.',
 	'error.invalidTheme': 'Invalid theme.',
 	'error.invalidLocale': 'Invalid locale.',
 	'error.invalidReminderUndo': 'Invalid undo window value.',
 	'error.invalidRecurrence': 'Invalid recurrence configuration.',
 	'error.invalidDefaultRecurrence': 'Invalid default recurrence unit.',
 	'error.invalidRole': 'Invalid role.',
+	'error.invalidNtfyTopic':
+		'Topic may only contain letters, numbers, dashes and underscores (max 64).',
 	'error.invalidDate': 'Invalid date',
 	'error.invalidArchiveDate': 'Invalid archive date.',
 	'error.invalidCompanionIds': 'One or more companion IDs are invalid.',
@@ -221,6 +227,25 @@ const messages = {
 	'page.settings.defaultRecurrenceLabel': 'Default unit',
 	'page.settings.defaultRecurrenceSystem': 'Use system default (days)',
 	'page.settings.defaultRecurrenceUpdated': '✓ Default recurrence updated.',
+	'page.settings.notificationsCard': 'Notifications',
+	'page.settings.notificationsDescription':
+		'Get emails from EinVault. Caretakers are only notified about reminders for companions assigned to them.',
+	'page.settings.notifyReminderEmailLabel': 'Email me when a reminder is due',
+	'page.settings.notifyShiftEmailLabel': 'Email me 24 hours before a shift starts or ends',
+	'page.settings.notificationsUpdated': 'Notification settings updated.',
+	'page.settings.notificationsNeedEmail':
+		'Add an email address to your account to receive email notifications.',
+	'page.settings.ntfyTopicLabel': 'ntfy topic',
+	'page.settings.ntfyTopicHint':
+		'Pushes cover due reminders and shift alerts for what you can see in EinVault. They go to this topic on the ntfy server configured by your admin. Pick a long random name; anyone who knows it can subscribe. Leave empty to disable pushes.',
+	'page.settings.testEmail': 'Send test email',
+	'page.settings.testNtfy': 'Send test push',
+	'page.settings.testSent': 'Test notification sent.',
+	'page.settings.testFailed': 'Test failed: {error}',
+	'error.testCooldown': 'Wait a few seconds before sending another test.',
+	'email.test.subject': 'EinVault test notification',
+	'email.test.body':
+		'This is a test notification from EinVault. If you are reading this, your notification settings work.',
 
 	// Errors: OIDC
 	'error.oidc.notProvisioned':
@@ -238,6 +263,27 @@ const messages = {
 	'page.login.passwordLabel': 'Password',
 	'page.login.signIn': 'Sign in',
 	'page.login.signingIn': 'Signing in…',
+	'page.login.forgotPassword': 'Forgot password?',
+
+	// Page: Forgot password
+	'page.forgot.title': 'Reset your password',
+	'page.forgot.instruction':
+		'Enter the email address on your account and we will send you a link to reset your password.',
+	'page.forgot.emailLabel': 'Email',
+	'page.forgot.submit': 'Send reset link',
+	'page.forgot.sending': 'Sending…',
+	'page.forgot.success': 'If an account with that email exists, a reset link has been sent.',
+	'page.forgot.backToLogin': 'Back to sign in',
+
+	// Page: Reset password
+	'page.reset.title': 'Choose a new password',
+	'page.reset.newPasswordLabel': 'New password',
+	'page.reset.confirmPasswordLabel': 'Confirm new password',
+	'page.reset.submit': 'Set new password',
+	'page.reset.saving': 'Saving…',
+	'page.reset.success': 'Your password has been updated. You can now sign in.',
+	'page.reset.invalid': 'This reset link is invalid or has expired.',
+	'page.reset.requestNew': 'Request a new link',
 
 	// Page: Setup
 	'page.setup.title': 'Setup',
@@ -701,6 +747,32 @@ const messages = {
 	'aria.previousMedia': 'Previous media',
 	'aria.nextMedia': 'Next media',
 	'aria.viewPhoto': "View {name}'s photo",
+
+	// Email: password reset
+	'email.reset.subject': 'Reset your EinVault password',
+	'email.reset.greeting': 'Hi {name},',
+	'email.reset.body':
+		'A password reset was requested for your EinVault account ({username}). Use the link below to choose a new password. The link expires in 30 minutes.',
+	'email.reset.cta': 'Reset password',
+	'email.reset.ignore': 'If you did not request this, you can safely ignore this email.',
+
+	// Email: reminder due
+	'email.reminder.subject': 'Reminder: {title}',
+	// greeting + cta are shared by reminder AND shift emails (see templates.ts)
+	'email.reminder.greeting': 'Hi {name},',
+	'email.reminder.body': '{companion} has a reminder due: {title}',
+	'email.reminder.dueLine': 'Due: {due}',
+	'email.reminder.cta': 'Open EinVault',
+	'email.reminder.footer':
+		'You are receiving this because reminder email notifications are enabled in your EinVault settings.',
+
+	// Email: caretaker shift alerts
+	'email.shift.startSubject': 'Shift starting soon: {caretaker}',
+	'email.shift.endSubject': 'Shift ending soon: {caretaker}',
+	'email.shift.startBody': '{caretaker} begins a care shift on {start}.',
+	'email.shift.endBody': '{caretaker} finishes a care shift on {end}.',
+	'email.shift.footer':
+		'You are receiving this because shift email notifications are enabled in your EinVault settings.',
 
 	// Immich picker
 	'immich.picker.title': 'Pick from Immich',

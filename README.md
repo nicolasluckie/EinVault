@@ -13,6 +13,8 @@ EinVault is a private, self-hosted companion health and care tracker built for h
   - [Video transcoding (optional)](#video-transcoding-optional)
   - [External image storage (optional)](#external-image-storage-optional)
   - [Immich integration (optional)](#immich-integration-optional)
+  - [SMTP email (optional)](#smtp-email-optional)
+  - [ntfy push notifications (optional)](#ntfy-push-notifications-optional)
   - [Data and backup](#data-and-backup)
   - [Container hardening](#container-hardening)
   - [Image tags](#image-tags)
@@ -149,6 +151,32 @@ When `IMMICH_URL` and `IMMICH_API_KEY` are set, members and admins get a "Pick f
 | `IMMICH_URL`      | —       | Base URL of your Immich server, e.g. `http://immich.local:2283`. No trailing slash. Required if `IMMICH_API_KEY` is set.                                                                     |
 | `IMMICH_API_KEY`  | —       | API key. Required permissions: `asset.read`, `asset.view`, plus `album.read` if `IMMICH_ALBUM_ID` is set. Generate in Immich → Account Settings → API Keys. Required if `IMMICH_URL` is set. |
 | `IMMICH_ALBUM_ID` | —       | If set, the picker only shows assets in this album. If unset, the picker shows the user's most recent assets across the whole library.                                                       |
+
+### SMTP email (optional)
+
+When `SMTP_HOST` and `SMTP_FROM` are both set, EinVault enables outbound email and adds a self-service "Forgot password?" link on the login page. When SMTP is configured, users can also opt in (Settings -> Notifications) to an email when a reminder comes due, and to an email 24 hours before a caretaker shift starts or ends. Caretakers only receive reminder emails for companions assigned to them, and shift emails for their own shifts. Both variables must be set together; setting only one disables email and logs a warning at startup.
+
+`ORIGIN` must be set correctly: password reset links are built from it. Behind a reverse proxy, make sure `ORIGIN` matches the public URL users see.
+
+|               | Default | Description                                                                                                                     |
+| ------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `SMTP_HOST`   | —       | SMTP server hostname. Required (with `SMTP_FROM`) to enable email.                                                              |
+| `SMTP_PORT`   | `587`   | SMTP port. Use `465` with `SMTP_SECURE=true` for implicit TLS, or `587` (default) for STARTTLS.                                 |
+| `SMTP_SECURE` | `false` | `true` = implicit TLS (port 465). `false` = STARTTLS upgrade on connect.                                                        |
+| `SMTP_USER`   | —       | SMTP username. Leave unset for unauthenticated relays.                                                                          |
+| `SMTP_PASS`   | —       | SMTP password. Leave unset for unauthenticated relays.                                                                          |
+| `SMTP_FROM`   | —       | RFC 5322 From address shown to recipients, e.g. `EinVault <einvault@example.com>`. Required (with `SMTP_HOST`) to enable email. |
+
+### ntfy push notifications (optional)
+
+When `NTFY_URL` is set, EinVault can publish push notifications via [ntfy](https://ntfy.sh). This configures the server only (base URL and optional access token). Each user sets their own topic name under Settings -> Notifications; a non-empty topic is that user's opt-in for pushes scoped to what they can see in the app (reminders due, shift alerts). The notification scheduler runs when either SMTP or ntfy is configured. The forgot-password flow remains email-only.
+
+On public servers like ntfy.sh, the topic name is the only access control. Users should pick long, random topic names that are hard to guess.
+
+|              | Default | Description                                                                                              |
+| ------------ | ------- | -------------------------------------------------------------------------------------------------------- |
+| `NTFY_URL`   | —       | ntfy server base URL, e.g. `https://ntfy.sh` or a self-hosted instance. No topic in the URL.             |
+| `NTFY_TOKEN` | —       | Bearer token for self-hosted ntfy servers with auth enabled. Used for every publish regardless of topic. |
 
 ### Data and backup
 
