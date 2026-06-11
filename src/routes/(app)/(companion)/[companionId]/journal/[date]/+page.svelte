@@ -3,8 +3,10 @@
 	import { renderMarkdown, stripMarkdown } from '$lib/markdown';
 	import { tick } from 'svelte';
 	import { goto } from '$app/navigation';
+	import { page } from '$app/state';
 	import { enhance } from '$app/forms';
 	import MarkdownTextarea from '$lib/components/MarkdownTextarea.svelte';
+	import MediaLightbox from '$lib/components/MediaLightbox.svelte';
 	import { canModifyMedia } from '$lib/permissions';
 	import { isVideoMime, MEDIA_ACCEPT } from '$lib/media';
 	import JournalVideo from '$lib/components/JournalVideo.svelte';
@@ -219,6 +221,38 @@
 	}
 
 	let immichPickerOpen = $state(false);
+
+	// Lightbox state
+	let lightboxOpen = $state(false);
+	let lightboxIndex = $state(0);
+
+	function openLightbox(index: number) {
+		lightboxIndex = index;
+		lightboxOpen = true;
+	}
+
+	// Deep-link: ?media={id} opens the lightbox at that item. Re-fires for a
+	// different id/date (the page component is reused across date navigations),
+	// idempotent for the same one. Wait until `media` has loaded (a sibling
+	// effect fills it from data.photos) so we don't strip the param before the
+	// item can resolve, then resolve + strip exactly once per id.
+	let lastDeepLinkId = '';
+	$effect(() => {
+		const mediaId = page.url.searchParams.get('media');
+		if (!mediaId || mediaId === lastDeepLinkId) return;
+		if (media.length === 0) return;
+		lastDeepLinkId = mediaId;
+		const idx = media.findIndex((m) => m.id === mediaId);
+		if (idx !== -1) {
+			lightboxIndex = idx;
+			lightboxOpen = true;
+		}
+		tick().then(() => {
+			const url = new URL(page.url);
+			url.searchParams.delete('media');
+			history.replaceState(history.state, '', url.pathname + url.search);
+		});
+	});
 
 	async function pickFromImmich(assetId: string) {
 		try {
@@ -812,12 +846,19 @@
 										compact
 									/>
 								{:else}
-									<img
-										src={mediaUrl(item)}
-										alt={item.originalName ?? t(locale, 'page.journal.photoAlt')}
-										class="w-full h-full object-cover"
-										loading="lazy"
-									/>
+									<button
+										type="button"
+										onclick={() => openLightbox(media.indexOf(item))}
+										class="block w-full h-full focus:outline-none"
+										aria-label={item.originalName ?? t(locale, 'page.journal.photoAlt')}
+									>
+										<img
+											src={mediaUrl(item)}
+											alt={item.originalName ?? t(locale, 'page.journal.photoAlt')}
+											class="w-full h-full object-cover"
+											loading="lazy"
+										/>
+									</button>
 								{/if}
 								{#if canModifyMedia(data.user, item)}
 									<button
@@ -1245,6 +1286,14 @@
 >
 	<input type="hidden" name="id" value={deleteActivityId} />
 </form>
+
+<MediaLightbox
+	companionId={data.companion.id}
+	items={media}
+	date={data.date}
+	bind:open={lightboxOpen}
+	bind:index={lightboxIndex}
+/>
 
 <ConfirmDialog
 	open={confirmOpen}

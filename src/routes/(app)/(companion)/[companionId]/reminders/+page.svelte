@@ -98,6 +98,22 @@
 		});
 	});
 
+	// Re-fires for a different reminder/companion (page component is reused
+	// across companion navigations), idempotent for the same one.
+	let lastDeepLinkId = '';
+	$effect(() => {
+		const detailId = page.url.searchParams.get('detail');
+		if (!detailId || detailId === lastDeepLinkId) return;
+		lastDeepLinkId = detailId;
+		const match = data.reminders.find((r) => r.id === detailId);
+		if (match) openDetail(match);
+		tick().then(() => {
+			const url = new URL(page.url);
+			url.searchParams.delete('detail');
+			history.replaceState(history.state, '', url.pathname + url.search);
+		});
+	});
+
 	function startEdit(reminder: (typeof data.reminders)[0]) {
 		editingId = reminder.id;
 	}
