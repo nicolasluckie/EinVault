@@ -47,8 +47,8 @@ export async function startAppServer(opts: {
 	child.stderr!.on('data', (d: Buffer) => logs.push(d.toString()));
 	// Spawn failures (missing build/, ENOENT on node) emit 'error' and never
 	// fire 'exit'; surface the cause instead of an opaque readiness timeout.
-	let spawnError: Error | null = null;
-	child.on('error', (err) => {
+	let spawnError: Error | undefined = undefined;
+	child.on('error', (err: Error) => {
 		spawnError = err;
 		logs.push(`[spawn error] ${err.message}\n`);
 	});
@@ -58,8 +58,9 @@ export async function startAppServer(opts: {
 	while (Date.now() < deadline) {
 		if (child.exitCode !== null || spawnError) break;
 		try {
-			const res = await fetch(`${baseURL}/auth/login`);
-			if (res.ok) {
+			const res = await fetch(`${baseURL}/auth/login`, { redirect: 'manual' });
+			// Accept any 2xx or 3xx response (server is up, may redirect to /setup)
+			if (res.status >= 200 && res.status < 400) {
 				ready = true;
 				break;
 			}
@@ -70,6 +71,9 @@ export async function startAppServer(opts: {
 	}
 	if (!ready) {
 		child.kill('SIGKILL');
+		console.error(`[app-server] failed to start on ${baseURL}`);
+		console.error(`[app-server] exit code: ${child.exitCode}`);
+		console.error(`[app-server] logs:\n${logs.join('')}`);
 		throw new Error(`app server failed to start on ${baseURL}\n--- logs ---\n${logs.join('')}`);
 	}
 

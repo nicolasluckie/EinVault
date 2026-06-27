@@ -9,6 +9,13 @@ import bcrypt from 'bcryptjs';
  * Returns the stable user ID so sessions continue to work.
  */
 export async function bootstrapAdminUser(): Promise<string> {
+	// Check if users table is empty (setup wizard scenario)
+	const anyUser = await db.query.users.findFirst();
+	if (!anyUser) {
+		console.info('[bootstrap] users table is empty — skipping bootstrap for setup wizard');
+		return '';
+	}
+
 	if (!ADMIN_PASSWORD_HASH) {
 		console.warn('[bootstrap] ADMIN_PASSWORD_HASH not set — admin user will not be provisioned');
 		throw new Error('ADMIN_PASSWORD_HASH environment variable is required');
