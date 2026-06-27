@@ -14,6 +14,15 @@ export async function bootstrapAdminUser(): Promise<string> {
 		throw new Error('ADMIN_PASSWORD_HASH environment variable is required');
 	}
 
+	// Validate bcrypt hash format (starts with $2a$, $2b$, or $2y$)
+	if (!/^\$2[aby]\$\d+\$/.test(ADMIN_PASSWORD_HASH)) {
+		console.error(
+			'[bootstrap] ADMIN_PASSWORD_HASH does not appear to be a valid bcrypt hash. ' +
+				'Ensure the value is quoted in your .env file to prevent shell expansion: ADMIN_PASSWORD_HASH="$2b$12$..."'
+		);
+		throw new Error('ADMIN_PASSWORD_HASH is not a valid bcrypt hash');
+	}
+
 	const existing = await db.query.users.findFirst({
 		where: eq(schema.users.username, ADMIN_USERNAME)
 	});
