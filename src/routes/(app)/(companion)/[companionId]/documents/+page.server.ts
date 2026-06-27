@@ -8,7 +8,7 @@ export const load: PageServerLoad = async ({ params, locals, parent }) => {
 	if (!locals.user) redirect(302, '/auth/login');
 	// Documents are owner-private; caretakers never reach this route group,
 	// but a defense-in-depth redirect costs nothing.
-	if (locals.user.role === 'caretaker') redirect(302, '/care');
+	// Removed: all users are now admins
 	const { companion } = await parent();
 
 	const [documents, healthEvents] = await Promise.all([

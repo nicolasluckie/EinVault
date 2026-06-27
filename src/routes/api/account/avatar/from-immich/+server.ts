@@ -13,10 +13,6 @@ import type { StorageProvider } from '$lib/server/storage/types';
 
 export const POST: RequestHandler = async ({ request, locals }) => {
 	if (!locals.user) error(401, t(locals.locale, 'error.unauthorized'));
-	// Caretakers cannot browse Immich; matches companion/from-immich and keeps
-	// the integration scoped to family members/admins only.
-	if (locals.user.role === 'caretaker') error(403, t(locals.locale, 'error.forbidden'));
-
 	const client = getImmichClient();
 	if (!client) error(404, t(locals.locale, 'error.notFound'));
 

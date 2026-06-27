@@ -57,8 +57,6 @@ const messages: Record<keyof Messages, string> = {
 
 	// Enum: User roles
 	'enum.role.admin': 'Administrateur',
-	'enum.role.member': 'Membre',
-	'enum.role.caretaker': 'Gardien',
 
 	// Enum: Sex
 	'enum.sex.male': 'Mâle',

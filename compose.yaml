@@ -19,9 +19,9 @@ services:
       MAX_DAILY_MEDIA: 10
       MAX_DOCUMENTS_PER_COMPANION: 200
       REMINDER_UNDO_SECONDS: 10
-      # Admin credentials (generate hash with: docker run --rm node:22-alpine node -e "require('bcryptjs').hash('yourpassword',12).then(console.log)")
+      # Admin credentials
       ADMIN_USERNAME: admin
-      ADMIN_PASSWORD_HASH:
+      ADMIN_PASSWORD:
 
     healthcheck:
       test: ['CMD', 'wget', '-qO-', 'http://127.0.0.1:3000/api/health']

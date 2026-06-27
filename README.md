@@ -74,12 +74,7 @@
    ```bash
    cp .env.example .env
    ```
-   2. Edit `.env` and set `ADMIN_USERNAME` and `ADMIN_PASSWORD_HASH`
-   3. Generate a password hash using:
-   ```bash
-   node -e 'require("bcryptjs").hash("yourpassword",12).then(console.log)'
-   ```
-   4. Replace `yourpassword` with your desired password in the `.env` file
+   2. Edit `.env` and set `ADMIN_USERNAME` and `ADMIN_PASSWORD`
 
 4. Create data directory and apply database migrations:
    ```bash
@@ -189,7 +184,7 @@ All the same env vars work here. `ORIGIN` defaults to `http://localhost:3000` so
 | `DEMO_MODE` | Enable read-only public demo mode | `false` |
 | `DATABASE_URL` | Database path inside the container | `/data/einvault.db` |
 | `ADMIN_USERNAME` | Admin username for login | — |
-| `ADMIN_PASSWORD_HASH` | Bcrypt hash of admin password (generate with: `node -e 'require("bcryptjs").hash("yourpassword",12).then(console.log)'`) | — |
+| `ADMIN_PASSWORD` | Admin password (plaintext, hashed automatically at startup) | — |
 
 ### Optional Integrations
 
@@ -285,7 +280,7 @@ CI runs lint, type checks, unit tests, and the e2e suite (sharded four ways) on 
 ## User Management
 
 - Admin user is bootstrapped from environment variables on first run
-- Set `ADMIN_USERNAME` and `ADMIN_PASSWORD_HASH` to provision the admin
+- Set `ADMIN_USERNAME` and `ADMIN_PASSWORD` to provision the admin
 - Manage users at `/admin/users`: create accounts, reset passwords, deactivate users
 - No open registration
 

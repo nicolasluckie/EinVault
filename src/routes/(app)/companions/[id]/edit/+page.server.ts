@@ -7,7 +7,6 @@ import { parseSex, parseWeightUnit } from '$lib/server/validation';
 
 export const load: PageServerLoad = async ({ params, locals }) => {
 	if (!locals.user) redirect(302, '/auth/login');
-	if (locals.user.role === 'caretaker') redirect(302, '/care');
 
 	const companion = await db.query.companions.findFirst({
 		where: eq(schema.companions.id, params.id)
@@ -20,7 +19,6 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 export const actions: Actions = {
 	save: async ({ request, params, locals }) => {
 		if (!locals.user) redirect(302, '/auth/login');
-		if (locals.user.role === 'caretaker') redirect(302, '/care');
 
 		const companion = await db.query.companions.findFirst({
 			where: eq(schema.companions.id, params.id)

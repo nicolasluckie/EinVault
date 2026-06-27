@@ -22,7 +22,7 @@
 			email: string | null;
 			phone: string | null;
 			avatarPath: string | null | undefined;
-			role: 'admin' | 'member' | 'caretaker';
+			role: 'admin';
 		};
 		immichEnabled: boolean;
 		successMessage?: string;
@@ -194,13 +194,7 @@
 
 		<div class="flex items-center justify-between text-sm mt-6 pt-4 border-t border-border">
 			<span class="text-muted-foreground">{t(locale, 'page.settings.roleLabel')}</span>
-			{#if user.role === 'admin'}
-				<Badge variant="primary">{t(locale, 'enum.role.admin')}</Badge>
-			{:else if user.role === 'caretaker'}
-				<Badge variant="teal">{t(locale, 'enum.role.caretaker')}</Badge>
-			{:else}
-				<Badge variant="gold">{t(locale, 'enum.role.member')}</Badge>
-			{/if}
+			<Badge variant="primary">{t(locale, 'enum.role.admin')}</Badge>
 		</div>
 	</CardContent>
 </Card>

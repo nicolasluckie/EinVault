@@ -55,8 +55,6 @@ const messages = {
 
 	// Enum: User roles
 	'enum.role.admin': 'Admin',
-	'enum.role.member': 'Member',
-	'enum.role.caretaker': 'Caretaker',
 
 	// Enum: Sex
 	'enum.sex.male': 'Male',

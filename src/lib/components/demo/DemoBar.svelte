@@ -35,15 +35,7 @@
 				class="rounded bg-primary-foreground/10 px-2 py-1"
 				onchange={submitRole}
 			>
-				<option value="admin" selected={currentRole === 'admin'}
-					>{t(locale, 'demo.roleAdmin')}</option
-				>
-				<option value="member" selected={currentRole === 'member'}
-					>{t(locale, 'demo.roleMember')}</option
-				>
-				<option value="caretaker" selected={currentRole === 'caretaker'}
-					>{t(locale, 'demo.roleCaretaker')}</option
-				>
+				<option value="admin" selected={true}>{t(locale, 'demo.roleAdmin')}</option>
 			</select>
 		</form>
 		<a

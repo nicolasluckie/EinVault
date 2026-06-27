@@ -3,14 +3,13 @@
  * Keep logic here so the UI (button visibility) and API (403 check) cannot drift.
  */
 
-type AuthUser = { id: string; role: 'admin' | 'member' | 'caretaker' } | null | undefined;
+type AuthUser = { id: string; role: 'admin' } | null | undefined;
 
 /**
- * Admins can modify (edit caption, delete) any journal media item. Other users
- * can modify only items they uploaded. Items with a null `loggedBy`
- * (pre-migration legacy rows) are modifiable only by admins.
+ * Users can modify (edit caption, delete) any journal media item they uploaded.
+ * Items with a null `loggedBy` (pre-migration legacy rows) are modifiable by any user.
  */
 export function canModifyMedia(user: AuthUser, item: { loggedBy: string | null }): boolean {
 	if (!user) return false;
-	return user.role === 'admin' || item.loggedBy === user.id;
+	return item.loggedBy === null || item.loggedBy === user.id;
 }

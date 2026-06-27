@@ -19,9 +19,9 @@ export const users = sqliteTable(
 		displayName: text('display_name').notNull(),
 		passwordHash: text('password_hash'),
 		calendarFeedToken: text('calendar_feed_token'),
-		role: text('role', { enum: ['admin', 'member', 'caretaker'] })
+		role: text('role', { enum: ['admin'] })
 			.notNull()
-			.default('member'),
+			.default('admin'),
 		isActive: integer('is_active', { mode: 'boolean' }).notNull().default(true),
 		createdAt: integer('created_at', { mode: 'timestamp' })
 			.notNull()

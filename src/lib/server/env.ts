@@ -445,7 +445,7 @@ export function logNtfyBootStatus(): void {
 // OIDC + password login are disabled.
 // Single-admin mode: credentials from environment
 export const ADMIN_USERNAME = env.ADMIN_USERNAME?.trim() ?? 'admin';
-export const ADMIN_PASSWORD_HASH = env.ADMIN_PASSWORD_HASH?.trim() ?? '';
+export const ADMIN_PASSWORD = env.ADMIN_PASSWORD?.trim() ?? '';
 
 export const DEMO_MODE = envBool(env.DEMO_MODE, false);
 

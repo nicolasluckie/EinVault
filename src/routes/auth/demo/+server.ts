@@ -40,5 +40,5 @@ export const POST: RequestHandler = async ({ request, cookies, getClientAddress 
 		makeSessionCookieOptions(session.expiresAt, isSecureRequest(request))
 	);
 
-	redirect(303, role === 'caretaker' ? '/care' : '/');
+	redirect(303, '/');
 };

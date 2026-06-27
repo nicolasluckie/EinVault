@@ -11,7 +11,6 @@ type Category = (typeof CATEGORIES)[number];
 
 export const PATCH: RequestHandler = async ({ request, params, locals }) => {
 	if (!locals.user) error(401, t(locals.locale, 'error.unauthorized'));
-	if (locals.user.role === 'caretaker') error(403, t(locals.locale, 'error.forbidden'));
 
 	const doc = await db.query.documents.findFirst({
 		where: eq(schema.documents.id, params.documentId)
@@ -87,7 +86,6 @@ export const PATCH: RequestHandler = async ({ request, params, locals }) => {
 
 export const DELETE: RequestHandler = async ({ params, locals }) => {
 	if (!locals.user) error(401, t(locals.locale, 'error.unauthorized'));
-	if (locals.user.role === 'caretaker') error(403, t(locals.locale, 'error.forbidden'));
 
 	const doc = await db.query.documents.findFirst({
 		where: eq(schema.documents.id, params.documentId)

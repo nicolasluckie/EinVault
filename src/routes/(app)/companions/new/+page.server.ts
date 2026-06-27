@@ -13,7 +13,6 @@ export const load: PageServerLoad = async ({ locals }) => {
 export const actions: Actions = {
 	default: async ({ request, locals }) => {
 		if (!locals.user) redirect(302, '/auth/login');
-		if (locals.user.role === 'caretaker') redirect(302, '/care');
 
 		const data = await request.formData();
 		const name = String(data.get('name') ?? '').trim();

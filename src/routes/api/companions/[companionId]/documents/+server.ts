@@ -51,9 +51,8 @@ async function validateHealthEventId(
 
 export const GET: RequestHandler = async ({ params, locals }) => {
 	// Documents are owner-private (receipts, invoices, ownership papers):
-	// members and admins only, caretakers excluded everywhere.
+	// Documents are owner-private.
 	if (!locals.user) error(401, t(locals.locale, 'error.unauthorized'));
-	if (locals.user.role === 'caretaker') error(403, t(locals.locale, 'error.forbidden'));
 
 	const companion = await db.query.companions.findFirst({
 		where: eq(schema.companions.id, params.companionId),
@@ -80,7 +79,6 @@ export const GET: RequestHandler = async ({ params, locals }) => {
 
 export const POST: RequestHandler = async ({ request, params, locals }) => {
 	if (!locals.user) error(401, t(locals.locale, 'error.unauthorized'));
-	if (locals.user.role === 'caretaker') error(403, t(locals.locale, 'error.forbidden'));
 	const { companionId } = params;
 
 	const companion = await db.query.companions.findFirst({

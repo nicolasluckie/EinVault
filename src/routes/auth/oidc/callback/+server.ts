@@ -109,14 +109,11 @@ export const GET: RequestHandler = async ({ url, cookies, locals, request, getCl
 	const displayName: string | undefined =
 		typeof idTokenClaims.name === 'string' ? idTokenClaims.name : undefined;
 
-	const defaultRoleEnv = env.OIDC_DEFAULT_ROLE === 'caretaker' ? 'caretaker' : 'member';
+	const defaultRoleEnv = 'admin';
 	const adminGroupsConfigured = isAdminGroupsConfigured();
 
 	// Linking algorithm — synchronous transaction.
-	type TxResult =
-		| { kind: 'ok'; userId: string; role: 'admin' | 'member' | 'caretaker' }
-		| { kind: 'disabled' }
-		| { kind: 'not_provisioned' };
+	type TxResult = { kind: 'ok'; userId: string; role: 'admin' } | { kind: 'disabled' } | { kind: 'not_provisioned' };
 
 	const txResult: TxResult = db.transaction((tx) => {
 		// 1. Find by OIDC subject.
@@ -130,7 +127,7 @@ export const GET: RequestHandler = async ({ url, cookies, locals, request, getCl
 			if (!byOidc.isActive) return { kind: 'disabled' };
 			// Only re-evaluate role when admin groups are configured; otherwise the IdP isn't
 			// the source of truth for roles and we preserve whatever was set locally.
-			let role: 'admin' | 'member' | 'caretaker' = byOidc.role;
+			let role: 'admin' = byOidc.role as 'admin';
 			if (adminGroupsConfigured) {
 				role = evaluateRole(idTokenClaims, byOidc.role);
 				if (role !== byOidc.role) {
@@ -256,5 +253,5 @@ export const GET: RequestHandler = async ({ url, cookies, locals, request, getCl
 		redirect(302, returnTo);
 	}
 
-	redirect(302, role === 'caretaker' ? '/care' : '/');
+	redirect(302, '/');
 };

@@ -30,7 +30,7 @@
 	type User = {
 		id: string;
 		displayName: string;
-		role: 'admin' | 'member' | 'caretaker';
+		role: 'admin';
 		avatarPath?: string | null;
 	};
 

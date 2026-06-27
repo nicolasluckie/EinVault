@@ -107,7 +107,7 @@ export function sexOptions(locale: Locale) {
 }
 
 export function roleOptions(locale: Locale) {
-	return (['admin', 'member', 'caretaker'] as const).map((v) => ({
+	return (['admin'] as const).map((v) => ({
 		value: v,
 		label: roleLabel(locale, v)
 	}));
