@@ -40,8 +40,11 @@
 |-------|-----------|
 | Frontend | SvelteKit, Svelte, TypeScript, Tailwind CSS |
 | Backend | Node.js, SvelteKit server |
-| Database | SQLite |
+| Database | SQLite, Drizzle ORM |
 | Deployment | Docker |
+| Testing | Vitest, Playwright |
+| Linting | ESLint, Prettier |
+| Changelog | git-cliff |
 
 ---
 
@@ -104,13 +107,21 @@ The app will be available at `http://localhost:5173`. Set `ADMIN_USERNAME` and `
 ```
 EinVault/
 ├── src/
-│   ├── components/        # UI components
-│   ├── lib/              # Utilities, i18n, database schema
+│   ├── components/        # Reusable UI components
+│   ├── lib/              # Utilities, i18n, database schema, server helpers
 │   ├── routes/           # SvelteKit file-based routing
 │   └── app.html         # HTML template
 ├── static/               # Static assets
+├── tests/
+│   ├── e2e/              # Playwright end-to-end tests
+│   ├── fakes/            # Fake implementations for external services
+│   └── lib/              # Test utilities and fixtures
+├── drizzle/              # Database migrations
 ├── docker-compose.prod.yml   # Production Docker Compose config
 ├── docker-compose.dev.yml    # Development Docker Compose config
+├── cliff.toml               # git-cliff changelog configuration
+├── AGENTS.md                # AI agent commit message rules
+├── CHANGELOG.md             # Auto-generated changelog
 └── README.md
 ```
 
@@ -260,25 +271,10 @@ CI runs lint, type checks, unit tests, and the e2e suite (sharded four ways) on 
 
 ## User Management
 
-- First run redirects to `/setup` to create the initial admin account (one-time only)
+- Admin user is bootstrapped from environment variables on first run
+- Set `ADMIN_USERNAME` and `ADMIN_PASSWORD_HASH` to provision the admin
 - Manage users at `/admin/users`: create accounts, reset passwords, deactivate users
 - No open registration
-
----
-
-## Two-Factor Authentication (2FA)
-
-EinVault supports per-user TOTP-based two-factor authentication. Users can enable it under Settings → Security: scan the QR code with any TOTP app (Aegis, Bitwarden Authenticator, Google Authenticator, etc.), enter the confirmation code, and download the 10 one-time backup codes.
-
-**Requirements.** 2FA requires `TWOFA_ENC_KEY` to be set. This is a 32-byte base64 key used to encrypt stored TOTP secrets at rest. Without it, 2FA is unavailable and the enforcement setting in the admin panel is locked.
-
-Generate a key:
-
-```bash
-openssl rand -base64 32
-```
-
-Add it to your compose file or `.env`.
 
 ---
 
