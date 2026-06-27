@@ -69,19 +69,26 @@
    npm install
    ```
 
-3. Create data directory and apply database migrations:
+3. Configure environment variables:
+   ```bash
+   cp .env.example .env
+   # Edit .env and set ADMIN_USERNAME and ADMIN_PASSWORD_HASH
+   # Generate password hash: node -e "require('bcryptjs').hash('yourpassword',12).then(console.log)"
+   ```
+
+4. Create data directory and apply database migrations:
    ```bash
    mkdir -p data
    npm run db:generate
    npm run db:migrate
    ```
 
-4. Start the development server:
+5. Start the development server:
    ```bash
    npm run dev
    ```
 
-The app will be available at `http://localhost:5173`. Set `ADMIN_USERNAME` and `ADMIN_PASSWORD_HASH` environment variables to provision the admin user on startup.
+The app will be available at `http://localhost:5173`.
 
 ---
 
