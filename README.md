@@ -52,8 +52,8 @@
 
 ### Prerequisites
 
-- [Node.js](https://nodejs.org) >= 20
-- npm >= 10
+- [Node.js](https://nodejs.org) >= 26.6.4
+- npm >= 11.17.0
 - Docker (optional, for containerized deployment)
 
 ### Installation
@@ -69,8 +69,9 @@
    npm install
    ```
 
-3. Generate and apply database migrations:
+3. Create data directory and apply database migrations:
    ```bash
+   mkdir -p data
    npm run db:generate
    npm run db:migrate
    ```
