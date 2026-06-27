@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Bump package.json version, generate CHANGELOG, and create release tag.
+# Bump version in README.md and package.json.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -10,7 +10,7 @@ usage() {
   cat <<'EOF'
 Usage: scripts/version-bump.sh <version> [options]
 
-Bump package.json version, generate CHANGELOG, and create git tag.
+Bump version in README.md and package.json.
 
   <version>       Semantic version (e.g. 1.0.0, 1.1.0, 2.0.0)
   --dry-run       Show what would be done without making changes
@@ -82,32 +82,21 @@ else
   npm version "$VERSION" --no-git-tag-version
 fi
 
-# Generate CHANGELOG
+# Update README.md version badge
 if [[ "$DRY_RUN" -eq 1 ]]; then
-  echo "[DRY RUN] Would run: git-cliff -o CHANGELOG.md"
+  echo "[DRY RUN] Would update README.md version badge to $VERSION"
 else
-  if command -v git-cliff >/dev/null 2>&1; then
-    echo "Generating CHANGELOG..."
-    git-cliff -o "${ROOT}/CHANGELOG.md"
-  else
-    echo "Warning: git-cliff not found, skipping CHANGELOG generation"
-  fi
+  echo "Updating README.md version badge to $VERSION..."
+  sed -i.bak "s/badge\/version-[0-9]\+\.[0-9]\+\.[0-9]\+/badge\/version-${VERSION}/g" "${ROOT}/README.md"
+  rm -f "${ROOT}/README.md.bak"
 fi
 
-# Commit package.json and CHANGELOG
+# Commit package.json, package-lock.json, and README.md
 if [[ "$DRY_RUN" -eq 1 ]]; then
-  echo "[DRY RUN] Would commit package.json and CHANGELOG.md"
+  echo "[DRY RUN] Would commit package.json, package-lock.json, and README.md"
 else
-  git add package.json CHANGELOG.md
-  git commit -m "chore(release): prepare ${TAG}"
-fi
-
-# Create git tag
-if [[ "$DRY_RUN" -eq 1 ]]; then
-  echo "[DRY RUN] Would create tag: $TAG"
-else
-  echo "Creating tag $TAG..."
-  git tag -a "$TAG" -m "Release ${TAG}"
+  git add package.json package-lock.json README.md
+  git commit -m "chore(release): bump version to ${TAG}"
 fi
 
 echo ""
@@ -119,6 +108,7 @@ fi
 echo ""
 echo "Next steps:"
 echo "  git push"
+echo "  git tag -a ${TAG} -m 'Release ${TAG}'"
 echo "  git push origin ${TAG}"
 echo ""
 echo "GitHub Actions will promote the Docker image to GHCR on tag push."
