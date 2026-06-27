@@ -70,11 +70,16 @@
    ```
 
 3. Configure environment variables:
+   1. Copy the example environment file:
    ```bash
    cp .env.example .env
-   # Edit .env and set ADMIN_USERNAME and ADMIN_PASSWORD_HASH
-   # Generate password hash: node -e "require('bcryptjs').hash('yourpassword',12).then(console.log)"
    ```
+   2. Edit `.env` and set `ADMIN_USERNAME` and `ADMIN_PASSWORD_HASH`
+   3. Generate a password hash using:
+   ```bash
+   node -e 'require("bcryptjs").hash("yourpassword",12).then(console.log)'
+   ```
+   4. Replace `yourpassword` with your desired password in the `.env` file
 
 4. Create data directory and apply database migrations:
    ```bash
@@ -184,7 +189,7 @@ All the same env vars work here. `ORIGIN` defaults to `http://localhost:3000` so
 | `DEMO_MODE` | Enable read-only public demo mode | `false` |
 | `DATABASE_URL` | Database path inside the container | `/data/einvault.db` |
 | `ADMIN_USERNAME` | Admin username for login | — |
-| `ADMIN_PASSWORD_HASH` | Bcrypt hash of admin password (generate with: `node -e "require('bcryptjs').hash('yourpassword',12).then(console.log)"`) | — |
+| `ADMIN_PASSWORD_HASH` | Bcrypt hash of admin password (generate with: `node -e 'require("bcryptjs").hash("yourpassword",12).then(console.log)'`) | — |
 
 ### Optional Integrations
 

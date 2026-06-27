@@ -18,7 +18,7 @@ export async function bootstrapAdminUser(): Promise<string> {
 	if (!/^\$2[aby]\$\d+\$/.test(ADMIN_PASSWORD_HASH)) {
 		console.error(
 			'[bootstrap] ADMIN_PASSWORD_HASH does not appear to be a valid bcrypt hash. ' +
-				'Ensure the value is quoted in your .env file to prevent shell expansion: ADMIN_PASSWORD_HASH="$2b$12$..."'
+				'Generate with: node -e \'require("bcryptjs").hash("yourpassword",12).then(console.log)\''
 		);
 		throw new Error('ADMIN_PASSWORD_HASH is not a valid bcrypt hash');
 	}
