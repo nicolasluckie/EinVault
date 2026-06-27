@@ -6,7 +6,7 @@ EinVault is a self-hosted application with a single supported release line: the 
 
 ## Reporting a vulnerability
 
-Please report suspected vulnerabilities privately via GitHub's "Report a vulnerability" form on the repository's Security tab (<https://github.com/davefatkin/EinVault/security/advisories/new>).
+Please report suspected vulnerabilities privately via GitHub's "Report a vulnerability" form on the repository's Security tab (<https://github.com/nicolasluckie/EinVault/security/advisories/new>).
 
 If you cannot use GitHub Security Advisories, email the maintainer at <security@einvault.com> with the subject prefix `[EinVault security]`.
 
@@ -37,7 +37,7 @@ Out of scope:
 
 ## Verifying releases
 
-Published container images at `ghcr.io/davefatkin/einvault` carry both an SLSA build provenance attestation (signed via Sigstore) and an SPDX SBOM, generated automatically by the release workflow.
+Published container images at `ghcr.io/davefatkin/einvault` carry both an SLSA build provenance attestation (signed via Sigstore) and an SPDX SBOM, generated automatically by the upstream release workflow.
 
 ### Verify the attestation
 
@@ -45,7 +45,7 @@ Using the [GitHub CLI](https://cli.github.com/) (`gh` 2.49 or later):
 
 ```bash
 gh attestation verify oci://ghcr.io/davefatkin/einvault:vX.Y.Z \
-    --repo davefatkin/EinVault
+    --repo nicolasluckie/EinVault
 ```
 
 The `gh attestation verify` command accepts a tag (`:vX.Y.Z`, `:latest`) or a digest reference (`@sha256:...`).

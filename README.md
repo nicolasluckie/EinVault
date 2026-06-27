@@ -10,7 +10,9 @@
 <div align="center">
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-1.0.5-7348f4.svg)](https://github.com/davefatkin/EinVault/releases)
+[![Version](https://img.shields.io/badge/version-1.0.5-7348f4.svg)](https://github.com/nicolasluckie/EinVault/releases)
+[![CI](https://github.com/nicolasluckie/EinVault/actions/workflows/ci.yml/badge.svg)](https://github.com/nicolasluckie/EinVault/actions/workflows/ci.yml)
+[![Tests](https://raw.githubusercontent.com/nicolasluckie/EinVault/main/tests/badge.svg)](https://github.com/nicolasluckie/EinVault/actions/workflows/ci.yml)
 
 </div>
 
