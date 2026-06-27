@@ -31,6 +31,17 @@ App runs at `http://localhost:5173`. First visit goes to `/setup`.
 - Svelte 5 runes (`$state`, `$derived`, `$effect`), no legacy Svelte 4 syntax
 - Prettier + ESLint: run `npm run format` before committing, `npm run lint` to check
 
+## Commit style
+
+Commits follow [Conventional Commits](https://www.conventionalcommits.org/). See [AGENTS.md](AGENTS.md) for the full specification (type, scope, and examples). Use pre-commit hooks to enforce this locally:
+
+```bash
+pip install pre-commit
+pre-commit install
+```
+
+To prepare a release, run `scripts/version-bump.sh X.Y.Z` — it bumps `package.json`, generates `CHANGELOG.md`, commits both, and creates a tag. Push the tag to trigger the Docker image promotion.
+
 ## Testing
 
 ```bash

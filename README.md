@@ -1,86 +1,123 @@
+<a name="readme-top"></a>
 <p align="center">
   <img src="docs/ein.svg" alt="Ein, the EinVault mascot" width="120" />
 </p>
 
-# EinVault
+<h1 align="center">EinVault</h1>
+
+<p align="center">A private, self-hosted companion health and care tracker built for homelabs. Track health records, daily activities, and care schedules for your animal companions. All data stays on your hardware. No cloud, no telemetry, no external accounts.</p>
+
+<div align="center">
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Version](https://img.shields.io/badge/version-1.0.5-7348f4.svg)](https://github.com/davefatkin/EinVault/releases)
 
-EinVault is a private, self-hosted companion health and care tracker built for homelabs. Track health records, daily activities, and care schedules for your animal companions. All data stays on your hardware. No cloud, no telemetry, no external accounts.
-
-Want a look before you self-host? There's a read-only demo at **[demo.einvault.app](https://demo.einvault.app)**. Pick a role and explore; nothing you do there sticks.
-
-## Contents
-
-- [Features](#features)
-- [Screenshots](#screenshots)
-- [Production (Docker)](#production-docker)
-  - [Other options](#other-options)
-  - [Video transcoding (optional)](#video-transcoding-optional)
-  - [External image storage (optional)](#external-image-storage-optional)
-  - [Immich integration (optional)](#immich-integration-optional)
-  - [Documents](#documents)
-  - [Paperless-ngx integration (optional)](#paperless-ngx-integration-optional)
-  - [SMTP email (optional)](#smtp-email-optional)
-  - [ntfy push notifications (optional)](#ntfy-push-notifications-optional)
-  - [Data and backup](#data-and-backup)
-  - [Container hardening](#container-hardening)
-  - [Image tags](#image-tags)
-  - [Verifying releases](#verifying-releases)
-- [Docker (local build)](#docker-local-build)
-- [Local development](#local-development)
-  - [Commands](#commands)
-  - [Testing](#testing)
-- [User management](#user-management)
-- [OIDC / SSO (optional)](#oidc--sso-optional)
-  - [Required variables](#required-variables)
-  - [Optional variables](#optional-variables)
-  - [Account linking](#account-linking)
-  - [Admin role mapping](#admin-role-mapping)
-  - [Logout](#logout)
-  - [Provider notes](#provider-notes)
-- [Two-factor authentication (2FA)](#two-factor-authentication-2fa)
-- [Adding a new locale](#adding-a-new-locale)
-- [Stack](#stack)
-- [License](#license)
-
-## Features
-
-- **Companion profiles:** breed, bio, vet info, emergency contacts, and avatar photo
-- **Daily journal:** per-companion entries with mood tracking, photo and video uploads, and a configurable daily media limit (default 5)
-- **Health tracking:** vet visits, vaccinations, medications, procedures, and weight history
-- **Activity logging:** walks, meals, bathroom trips, treats, play sessions, and grooming
-- **Reminders:** recurring and one-time reminders for medications, vaccinations, grooming, and more
-- **Search:** full-text search across journals, health, activity, reminders, documents, and media, with `@companion`, `#type`, and date-range filters (members and admins)
-- **Calendar feed:** subscribe to health events, reminders (with recurrence), and shifts from any calendar app or Home Assistant via a personal, revocable ICS URL
-- **Caretaker shifts:** schedule work shifts and export to calendar via iCalendar (.ics)
-- **Role-based access:** admins manage the app, members track health, caretakers log activities
-- **Self-contained:** single Docker container, SQLite database, no external dependencies
-- **Localization:** English, German, Spanish, French, Italian, and Portuguese (non-English translations are AI-generated and may contain errors)
-- **Responsive UI:** works on desktop and mobile, with dark and light mode support
-
-## Screenshots
-
-![EinVault dashboard](docs/screenshots/member_dashboard_hybrid.png)
-
-### Companion overview
-
-![Companion overview](docs/screenshots/member_companion_dark.png)
-
-### Caretaker dashboard
-
-![Caretaker dashboard](docs/screenshots/caretaker_dashboard_dark.png)
-
-| Member dashboard (mobile)                                                     | Caretaker dashboard (mobile)                                                        |
-| ----------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
-| ![Member dashboard mobile](docs/screenshots/member_dashboard_mobile_dark.png) | ![Caretaker dashboard mobile](docs/screenshots/caretaker_dashboard_mobile_dark.png) |
-
-[More screenshots](docs/SCREENSHOTS.md)
+</div>
 
 ---
 
-## Production (Docker)
+## Features
+
+- **Companion profiles** — breed, bio, vet info, emergency contacts, and avatar photo
+- **Daily journal** — per-companion entries with mood tracking, photo and video uploads, and a configurable daily media limit (default 5)
+- **Health tracking** — vet visits, vaccinations, medications, procedures, and weight history
+- **Activity logging** — walks, meals, bathroom trips, treats, play sessions, and grooming
+- **Reminders** — recurring and one-time reminders for medications, vaccinations, grooming, and more
+- **Search** — full-text search across journals, health, activity, reminders, documents, and media, with `@companion`, `#type`, and date-range filters (members and admins)
+- **Calendar feed** — subscribe to health events, reminders (with recurrence), and shifts from any calendar app or Home Assistant via a personal, revocable ICS URL
+- **Caretaker shifts** — schedule work shifts and export to calendar via iCalendar (.ics)
+- **Role-based access** — admins manage the app, members track health, caretakers log activities
+- **Self-contained** — single Docker container, SQLite database, no external dependencies
+- **Localization** — English, German, Spanish, French, Italian, and Portuguese (non-English translations are AI-generated and may contain errors)
+- **Responsive UI** — works on desktop and mobile, with dark and light mode support
+
+---
+
+## Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| Frontend | SvelteKit, Svelte, TypeScript, Tailwind CSS |
+| Backend | Node.js, SvelteKit server |
+| Database | SQLite |
+| Deployment | Docker |
+
+---
+
+## Getting Started
+
+### Prerequisites
+
+- [Node.js](https://nodejs.org) >= 20
+- npm >= 10
+- Docker (optional, for containerized deployment)
+
+### Installation
+
+1. Clone the repo:
+   ```bash
+   git clone https://github.com/nicolasluckie/EinVault.git
+   cd EinVault
+   ```
+
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+3. Generate and apply database migrations:
+   ```bash
+   npm run db:generate
+   npm run db:migrate
+   ```
+
+4. Start the development server:
+   ```bash
+   npm run dev
+   ```
+
+The app will be available at `http://localhost:5173`. Open it and follow the `/setup` prompt to create your admin account.
+
+---
+
+## Available Scripts
+
+| Script | Description |
+|--------|-------------|
+| `npm run dev` | Start development server at http://localhost:5173 |
+| `npm run build` | Build for production |
+| `npm run check` | SvelteKit type checking |
+| `npm run lint` | ESLint + Prettier check |
+| `npm run format` | Auto-format with Prettier |
+| `npm run test:unit` | Unit tests (Vitest) |
+| `npm run test:e2e` | End-to-end tests (Playwright, builds the app first) |
+| `npm test` | Run both unit and e2e tests |
+| `npm run db:generate` | Generate a migration file after schema changes |
+| `npm run db:migrate` | Apply pending migrations |
+| `npm run db:studio` | Drizzle Studio (visual database browser) |
+
+---
+
+## Project Structure
+
+```
+EinVault/
+├── src/
+│   ├── components/        # UI components
+│   ├── lib/              # Utilities, i18n, database schema
+│   ├── routes/           # SvelteKit file-based routing
+│   └── app.html         # HTML template
+├── static/               # Static assets
+├── docker-compose.prod.yml   # Production Docker Compose config
+├── docker-compose.dev.yml    # Development Docker Compose config
+└── README.md
+```
+
+---
+
+## Docker
+
+### Production Deployment
 
 Requires Docker Engine 24+, Docker Compose v2, and a reverse proxy for TLS (Caddy, Nginx, Traefik, or similar).
 
@@ -99,185 +136,7 @@ mkdir -p ./data
 docker compose -f docker-compose.prod.yml up -d
 ```
 
-Open your domain and follow the `/setup` prompt to create your admin account.
-
-### Other options
-
-Everything else in the compose file can be edited directly:
-
-|                               | Default             | Description                                                                                                                                                |
-| ----------------------------- | ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `TZ`                          | `UTC`               | Container timezone. Set to your local timezone (e.g. `America/New_York`, `Europe/London`) so dates and times display correctly.                            |
-| `UPLOAD_MAX_MB`               | `10`                | Maximum size in MB for image (photo and avatar) uploads. `BODY_SIZE_LIMIT` is derived from the larger of this and `VIDEO_MAX_MB` at container start.       |
-| `VIDEO_MAX_MB`                | `100`               | Maximum size in MB for journal video uploads. Videos are stored as-is unless transcoding is enabled (see below).                                           |
-| `MAX_DAILY_MEDIA`             | `5`                 | Maximum number of journal photos and videos (combined) per companion per day. (Renamed from `MAX_DAILY_PHOTOS`, still honored with a deprecation warning.) |
-| `MAX_DOCUMENTS_PER_COMPANION` | `200`               | Maximum number of documents (uploads and Paperless references combined) stored per companion.                                                              |
-| `REMINDER_UNDO_SECONDS`       | `7`                 | Default undo window (seconds) when dismissing a Reminder. `0` disables the undo window. Each user can override in their settings.                          |
-| `CALENDAR_FEED_HISTORY_DAYS`  | `90`                | Days of past events the calendar feed includes. `0` includes all history (larger feeds).                                                                   |
-| `CALENDAR_FEED_ENABLED`       | `true`              | Set `false` to disable the calendar feed endpoint entirely.                                                                                                |
-| `DEMO_MODE`                   | `false`             | Enable read-only public demo mode. See [Running a demo instance](#running-a-demo-instance).                                                                |
-| `user`                        | `1000:1000`         | UID:GID the container runs as. Change if your `./data` directory has different ownership.                                                                  |
-| `./data` volume               | `./data`            | Where the database and uploads are stored on the host.                                                                                                     |
-| `DATABASE_URL`                | `/data/einvault.db` | Database path inside the container. Unlikely to need changing.                                                                                             |
-| `TWOFA_ENC_KEY`               | —                   | 32-byte base64 key (`openssl rand -base64 32`) that encrypts stored TOTP secrets. Required to enable two-factor authentication.                            |
-
-The calendar feed URL contains a secret token that authenticates the subscriber. Avoid logging full `/api/calendar/` request URLs at the reverse proxy, as the token would appear in plain text in your access logs.
-
-### Video transcoding (optional)
-
-By default, uploaded videos are stored exactly as received. A browser can only play codecs it supports, so a clip in a format like H.265/HEVC (common from Apple devices) may fail to play and fall back to a download link.
-
-Set `VIDEO_TRANSCODE=true` to convert each uploaded video to a universal web profile (H.264 + AAC in an MP4 with the moov atom at the front) and generate a poster thumbnail. Conversion runs in the background after upload: the video shows a "converting" state and switches to the playable version when it finishes. The feature is off by default because it is CPU-intensive and depends on `ffmpeg`.
-
-`ffmpeg` and `ffprobe` ship in the official Docker image, including the HEVC decoder needed to read Apple-recorded source and `libx264` for H.264 output. If you run outside the image and the binaries are not found, the feature disables itself and videos are stored as-is.
-
-|                               | Default                | Description                                                                                                                                               |
-| ----------------------------- | ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `VIDEO_TRANSCODE`             | `false`                | Enable background transcoding of uploaded videos to a web-playable MP4 plus a poster.                                                                     |
-| `VIDEO_KEEP_ORIGINAL`         | `true`                 | Keep the original source file alongside the transcoded copy. The original is never served; it is retained for re-encoding or backup. `false` discards it. |
-| `VIDEO_TRANSCODE_MAX_MB`      | `VIDEO_MAX_MB`         | Skip transcoding (store as-is) for inputs larger than this.                                                                                               |
-| `VIDEO_TRANSCODE_MAX_SECONDS` | `600`                  | Skip transcoding for inputs longer than this.                                                                                                             |
-| `VIDEO_TRANSCODE_MAX_WIDTH`   | `4096`                 | Skip transcoding for inputs wider than this.                                                                                                              |
-| `VIDEO_TRANSCODE_MAX_HEIGHT`  | `4096`                 | Skip transcoding for inputs taller than this.                                                                                                             |
-| `VIDEO_FFMPEG_PATH`           | `/usr/bin/ffmpeg`      | Absolute path to the `ffmpeg` binary. Override if it lives elsewhere (e.g. `/opt/homebrew/bin/ffmpeg` on macOS).                                          |
-| `VIDEO_FFPROBE_PATH`          | `/usr/bin/ffprobe`     | Absolute path to the `ffprobe` binary.                                                                                                                    |
-| `VIDEO_TMP_DIR`               | `<data>/transcode-tmp` | Scratch directory for in-progress transcodes. Must be on disk with room for the source plus output. Do not point it at the in-memory `/tmp` tmpfs.        |
-
-Transcoding decodes attacker-supplied media with `ffmpeg`. The shipped compose files already run the container with a read-only root filesystem, all capabilities dropped, and `no-new-privileges`, which contains a decoder exploit. For extra isolation you can run the container without network access.
-
-Transcoding is the only CPU-heavy thing EinVault does. It runs one job at a time with `ffmpeg` capped at two threads, so it never grabs the whole host, but the default `cpus: 0.5` / `memory: 256M` limits in `docker-compose.prod.yml` are sized for the app alone and are too low once it is enabled. With transcoding on, raise them to roughly `cpus: 1.5` (use `1.0` on a small host, `2.0` for the fastest conversions) and `memory: 512M` (`1G` if you allow large or 4K clips). The memory bump matters most: the worker buffers the whole clip while converting, and too low a limit will OOM-kill the job rather than slow it down.
-
-### External image storage (optional)
-
-By default, avatars and journal photos are written to `./data/uploads`. You can instead route new uploads to an S3-compatible bucket (AWS S3, Garage, MinIO, Backblaze B2, Cloudflare R2). Existing photos remain on disk; only new writes go to S3.
-
-|                          | Default | Description                                                                                                                                                               |
-| ------------------------ | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `STORAGE_BACKEND`        | `local` | `local` writes to `./data/uploads`. `s3` writes new uploads to the configured bucket. Reads always honor the per-row provider, so switching does not invalidate old rows. |
-| `S3_ENDPOINT`            | —       | Full endpoint URL, e.g. `https://s3.garage.example.com` or `https://s3.us-east-1.amazonaws.com`.                                                                          |
-| `S3_BUCKET`              | —       | Bucket name. Must already exist and should be private.                                                                                                                    |
-| `S3_REGION`              | `auto`  | Region. For non-AWS providers, `auto` usually works.                                                                                                                      |
-| `S3_ACCESS_KEY_ID`       | —       | Access key. Scope it to this bucket only.                                                                                                                                 |
-| `S3_SECRET_ACCESS_KEY`   | —       | Secret key.                                                                                                                                                               |
-| `S3_FORCE_PATH_STYLE`    | `false` | Set to `true` for Garage, MinIO, and older S3 deployments. Leave `false` for AWS and R2.                                                                                  |
-| `S3_PRESIGN_TTL_SECONDS` | `300`   | Lifetime of presigned download URLs. Shorter is stricter, longer improves browser cache reuse on reload.                                                                  |
-
-Downloads use short-lived presigned URLs (the app issues a 302 redirect). Access control is checked before the URL is issued; once issued, the URL stays valid for the full TTL even if permissions later change. Keep the TTL short.
-
-### Immich integration (optional)
-
-When `IMMICH_URL` and `IMMICH_API_KEY` are set, members and admins get a "Pick from Immich" option on the journal photo and companion avatar flows. The chosen asset stays in Immich; EinVault stores only a reference and proxies reads through the server using the API key. EinVault never uploads to Immich and never deletes assets from it. Caretakers cannot use the picker.
-
-|                   | Default | Description                                                                                                                                                                                  |
-| ----------------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `IMMICH_URL`      | —       | Base URL of your Immich server, e.g. `http://immich.local:2283`. No trailing slash. Required if `IMMICH_API_KEY` is set.                                                                     |
-| `IMMICH_API_KEY`  | —       | API key. Required permissions: `asset.read`, `asset.view`, plus `album.read` if `IMMICH_ALBUM_ID` is set. Generate in Immich → Account Settings → API Keys. Required if `IMMICH_URL` is set. |
-| `IMMICH_ALBUM_ID` | —       | If set, the picker only shows assets in this album. If unset, the picker shows the user's most recent assets across the whole library.                                                       |
-
-### Documents
-
-Each companion has a Documents tab for receipts, invoices, vaccination records, and other paperwork. Members and admins can upload PDFs and images (JPEG, PNG, WebP, HEIC) up to `UPLOAD_MAX_MB`, sort them into categories, set a document date, and link a document to a health event. Uploaded images are re-encoded server-side to strip metadata; PDFs are stored as received. Documents are private to members and admins; caretakers have no access. PDFs preview in the browser without leaving the page.
-
-### Paperless-ngx integration (optional)
-
-When `PAPERLESS_URL` and `PAPERLESS_API_TOKEN` are set, members and admins get an "Add from Paperless" option on the Documents tab that searches a [Paperless-ngx](https://docs.paperless-ngx.com/) instance and attaches a document by reference. The document stays in Paperless; EinVault stores only a reference and proxies reads through the server using the token. EinVault never uploads to or deletes from Paperless. Caretakers cannot use the picker. EinVault serves the archived (OCR'd PDF) version of each referenced document.
-
-The token can read every document its Paperless user can see, and any member can then search and attach them. Set `PAPERLESS_TAG_ID` to limit the picker and import to one tag, and use a dedicated Paperless user whose object permissions are restricted to that tag.
-
-|                       | Default | Description                                                                                                                                                         |
-| --------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `PAPERLESS_URL`       | —       | Base URL of your Paperless-ngx instance, e.g. `http://paperless.local:8000`. No trailing slash. Required if `PAPERLESS_API_TOKEN` is set.                           |
-| `PAPERLESS_API_TOKEN` | —       | API token. Generate in Paperless under Settings → "My Profile". Use a dedicated user limited to the documents you want visible. Required if `PAPERLESS_URL` is set. |
-| `PAPERLESS_TAG_ID`    | —       | If set, only documents carrying this Paperless tag ID can be searched and imported. Strongly recommended; without it every member can search the whole library.     |
-
-### SMTP email (optional)
-
-When `SMTP_HOST` and `SMTP_FROM` are both set, EinVault enables outbound email and adds a self-service "Forgot password?" link on the login page. When SMTP is configured, users can also opt in (Settings -> Notifications) to an email when a reminder comes due, and to an email 24 hours before a caretaker shift starts or ends. Caretakers only receive reminder emails for companions assigned to them, and shift emails for their own shifts. Both variables must be set together; setting only one disables email and logs a warning at startup.
-
-`ORIGIN` must be set correctly: password reset links are built from it. Behind a reverse proxy, make sure `ORIGIN` matches the public URL users see.
-
-|               | Default | Description                                                                                                                     |
-| ------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| `SMTP_HOST`   | —       | SMTP server hostname. Required (with `SMTP_FROM`) to enable email.                                                              |
-| `SMTP_PORT`   | `587`   | SMTP port. Use `465` with `SMTP_SECURE=true` for implicit TLS, or `587` (default) for STARTTLS.                                 |
-| `SMTP_SECURE` | `false` | `true` = implicit TLS (port 465). `false` = STARTTLS upgrade on connect.                                                        |
-| `SMTP_USER`   | —       | SMTP username. Leave unset for unauthenticated relays.                                                                          |
-| `SMTP_PASS`   | —       | SMTP password. Leave unset for unauthenticated relays.                                                                          |
-| `SMTP_FROM`   | —       | RFC 5322 From address shown to recipients, e.g. `EinVault <einvault@example.com>`. Required (with `SMTP_HOST`) to enable email. |
-
-### ntfy push notifications (optional)
-
-When `NTFY_URL` is set, EinVault can publish push notifications via [ntfy](https://ntfy.sh). This configures the server only (base URL and optional access token). Each user sets their own topic name under Settings -> Notifications; a non-empty topic is that user's opt-in for pushes scoped to what they can see in the app (reminders due, shift alerts). The notification scheduler runs when either SMTP or ntfy is configured. The forgot-password flow remains email-only.
-
-On public servers like ntfy.sh, the topic name is the only access control. Users should pick long, random topic names that are hard to guess.
-
-|                           | Default | Description                                                                                                                                                                   |
-| ------------------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `NTFY_URL`                | —       | ntfy server base URL, e.g. `https://ntfy.sh` or a self-hosted instance. No topic in the URL.                                                                                  |
-| `NTFY_TOKEN`              | —       | Bearer token for self-hosted ntfy servers with auth enabled. Used for every publish regardless of topic.                                                                      |
-| `NOTIFY_SCAN_INTERVAL_MS` | `60000` | How often the notification scheduler scans for due reminders and shift alerts, in milliseconds. Values below 250 fall back to the default. Mainly useful for automated tests. |
-
-### Data and backup
-
-Data lives in `./data` next to the compose file. Stop the container first so SQLite isn't mid-write, then copy the directory:
-
-```bash
-docker compose -f docker-compose.prod.yml stop einvault
-cp -r ./data ./data.bak
-docker compose -f docker-compose.prod.yml start einvault
-```
-
-### Running a demo instance
-
-Set `DEMO_MODE=true` and start with a fresh data volume. On boot the app self-provisions a sample dataset and re-anchors all dates to "now" daily, so the demo always looks recent. The login page becomes a role picker (admin / member / caretaker) that bypasses password auth; all write endpoints are blocked.
-
-Leave all integration and mail variables unset (`OIDC_*`, `S3_*`, `IMMICH_*`, `PAPERLESS_*`, `SMTP_*`, `NTFY_*`). `DEMO_MODE` disables OIDC at the source, but the others are independent outbound-fetch or SSRF-adjacent surface that the read-only guard does not cover.
-
-Behind Cloudflare, set the adapter-node client-IP header so the `/auth/demo` rate limiter sees the real visitor IP rather than the Cloudflare edge IP:
-
-```
-ADDRESS_HEADER=CF-Connecting-IP
-```
-
-If your setup uses `X-Forwarded-For` with multiple hops, also set `XFF_DEPTH` to the correct depth. Without the right header, the rate limit collapses all visitors into one bucket.
-
-Cloudflare caching: the app emits `Cache-Control: private, no-store` on authenticated HTML in demo mode, so do not add page rules that cache HTML. Hashed `/_app/immutable/*` assets are safe to cache aggressively — that is where the bandwidth saving comes from.
-
-### Container hardening
-
-|                     |                                         |
-| ------------------- | --------------------------------------- |
-| Runs as root        | No (runs as `node`, UID 1000)           |
-| `no-new-privileges` | Enabled                                 |
-| Linux capabilities  | All dropped                             |
-| Root filesystem     | Read-only                               |
-| Writable `/tmp`     | tmpfs, 64 MB                            |
-| CPU limit           | 0.5 cores (raise for video transcoding) |
-| Memory limit        | 256 MB (raise for video transcoding)    |
-
-### Image tags
-
-| Tag            | Description                                         |
-| -------------- | --------------------------------------------------- |
-| `latest`       | Latest stable release (published on version tags)   |
-| `x.y.z`        | Pinned release                                      |
-| `x.y`          | Latest patch of a minor release                     |
-| `main`         | Latest commit on `main`, unstable, for testing only |
-| `sha-<commit>` | Specific commit build, useful for rollback          |
-
-### Verifying releases
-
-Each release image carries a Sigstore-signed SLSA provenance attestation and a SPDX SBOM, and only ships after Trivy clears the OS and library packages on both `linux/amd64` and `linux/arm64`. See [SECURITY.md](SECURITY.md#verifying-releases) for the verification commands.
-
-For tag selection:
-
-- **`:latest`** is the lowest-friction default and what `docker-compose.prod.yml` uses. A `docker compose pull` will follow new releases automatically, so a hypothetical poisoned release would auto-deploy. Acceptable for casual homelab use, especially when paired with manual `gh attestation verify` before the pull.
-- **`:vX.Y.Z`** pins to a specific release. Auto-updaters like Watchtower will not move past it. Recommended for production deployments.
-- **`@sha256:<digest>`** pins to the exact bytes you verified. Immune to registry retags or future republishing. Recommended for hardened deployments.
-
----
-
-## Docker (local build)
+### Local Build
 
 Builds the image locally instead of pulling from GHCR. Useful for testing Dockerfile changes or working on EinVault itself:
 
@@ -289,41 +148,98 @@ All the same env vars work here. `ORIGIN` defaults to `http://localhost:3000` so
 
 ---
 
-## Local development
+## Environment Variables
 
-Requires Node.js 20+, npm 10+, and the native build tools for `better-sqlite3` and `sharp`:
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `ORIGIN` | Your public domain for production | `http://localhost:3000` |
+| `TZ` | Container timezone | `UTC` |
+| `UPLOAD_MAX_MB` | Maximum size in MB for image uploads | `10` |
+| `VIDEO_MAX_MB` | Maximum size in MB for journal video uploads | `100` |
+| `MAX_DAILY_MEDIA` | Maximum number of journal photos and videos per companion per day | `5` |
+| `MAX_DOCUMENTS_PER_COMPANION` | Maximum number of documents stored per companion | `200` |
+| `REMINDER_UNDO_SECONDS` | Default undo window (seconds) when dismissing a Reminder | `7` |
+| `CALENDAR_FEED_HISTORY_DAYS` | Days of past events the calendar feed includes | `90` |
+| `CALENDAR_FEED_ENABLED` | Set `false` to disable the calendar feed endpoint | `true` |
+| `DEMO_MODE` | Enable read-only public demo mode | `false` |
+| `DATABASE_URL` | Database path inside the container | `/data/einvault.db` |
+| `TWOFA_ENC_KEY` | 32-byte base64 key for encrypting TOTP secrets | — |
 
-- Debian/Ubuntu: `sudo apt install python3 g++ make`
-- macOS: `brew install python3` (Xcode Command Line Tools provides g++ and make)
+### Optional Integrations
+
+**Video Transcoding:**
+- `VIDEO_TRANSCODE` — Enable background transcoding of uploaded videos to web-playable MP4
+- `VIDEO_KEEP_ORIGINAL` — Keep original source file alongside transcoded copy
+- `VIDEO_TRANSCODE_MAX_MB` — Skip transcoding for inputs larger than this
+- `VIDEO_TRANSCODE_MAX_SECONDS` — Skip transcoding for inputs longer than this
+- `VIDEO_FFMPEG_PATH` — Absolute path to ffmpeg binary
+- `VIDEO_FFPROBE_PATH` — Absolute path to ffprobe binary
+
+**S3 Storage:**
+- `STORAGE_BACKEND` — `local` or `s3`
+- `S3_ENDPOINT` — Full endpoint URL
+- `S3_BUCKET` — Bucket name
+- `S3_REGION` — Region
+- `S3_ACCESS_KEY_ID` — Access key
+- `S3_SECRET_ACCESS_KEY` — Secret key
+- `S3_FORCE_PATH_STYLE` — Set to `true` for Garage, MinIO
+- `S3_PRESIGN_TTL_SECONDS` — Lifetime of presigned download URLs
+
+**Immich:**
+- `IMMICH_URL` — Base URL of your Immich server
+- `IMMICH_API_KEY` — API key with asset.read, asset.view permissions
+- `IMMICH_ALBUM_ID` — Optional album ID to limit picker
+
+**Paperless-ngx:**
+- `PAPERLESS_URL` — Base URL of your Paperless-ngx instance
+- `PAPERLESS_API_TOKEN` — API token
+- `PAPERLESS_TAG_ID` — Optional tag ID to limit picker
+
+**SMTP Email:**
+- `SMTP_HOST` — SMTP server hostname
+- `SMTP_PORT` — SMTP port (default 587)
+- `SMTP_SECURE` — `true` for implicit TLS (port 465)
+- `SMTP_USER` — SMTP username
+- `SMTP_PASS` — SMTP password
+- `SMTP_FROM` — RFC 5322 From address
+
+**ntfy Push Notifications:**
+- `NTFY_URL` — ntfy server base URL
+- `NTFY_TOKEN` — Bearer token for self-hosted ntfy servers
+- `NOTIFY_SCAN_INTERVAL_MS` — Notification scheduler scan interval
+
+**OIDC / SSO:**
+- `OIDC_ISSUER_URL` — IdP base URL
+- `OIDC_CLIENT_ID` — Client ID
+- `OIDC_CLIENT_SECRET` — Client secret
+- `OIDC_REDIRECT_URI` — Redirect URI registered with IdP
+- `OIDC_SCOPES` — Space-separated scopes (default: openid profile email)
+- `OIDC_PROVIDER_NAME` — Display label on login button
+- `OIDC_ALLOW_SIGNUP` — Auto-create accounts for new users
+- `OIDC_DEFAULT_ROLE` — Role for auto-created users
+- `OIDC_ADMIN_GROUPS` — Comma-separated groups for admin role
+- `OIDC_POST_LOGOUT_REDIRECT_URI` — RP-initiated logout redirect
+- `OIDC_STATE_SECRET` — State secret for OIDC
+- `OIDC_ALLOW_INSECURE_HTTP` — Allow plain-HTTP issuer URLs (testing only)
+
+---
+
+## Development
+
+Install pre-commit hooks to enforce commit message conventions and code quality:
 
 ```bash
-npm install
-npm run db:generate   # generate migration files from the schema
-npm run db:migrate    # apply migrations
-npm run dev           # http://localhost:5173
+pip install pre-commit
+pre-commit install
 ```
 
-No `.env` needed. The database defaults to `./data/einvault.db` and migrations run on startup. Open `http://localhost:5173` and you'll land on `/setup` to create your admin account.
+Commits follow [Conventional Commits](https://www.conventionalcommits.org/). See [AGENTS.md](AGENTS.md) for the full specification (type, scope, and examples).
 
-### Commands
+To prepare a release, run `scripts/version-bump.sh X.Y.Z` — it bumps `package.json`, generates `CHANGELOG.md`, commits both, and creates a tag. Push the tag to trigger the Docker image promotion. See [CONTRIBUTING.md](CONTRIBUTING.md) for full development setup details.
 
-```bash
-npm run dev            # dev server at http://localhost:5173
-npm run build          # production build
-npm run check          # SvelteKit type checking
-npm run lint           # ESLint + Prettier check
-npm run format         # auto-format with Prettier
-npm run test:unit      # unit tests (Vitest)
-npm run test:e2e       # end-to-end tests (Playwright, builds the app first)
-npm test               # both
-npm run db:generate    # generate a migration file after schema changes
-npm run db:migrate     # apply pending migrations
-npm run db:studio      # Drizzle Studio (visual database browser)
-```
+---
 
-When you change `src/lib/server/db/schema.ts`, run `db:generate` then `db:migrate` and commit both files together.
-
-### Testing
+## Testing
 
 Unit tests cover server helpers against a fresh in-memory database per test file. End-to-end tests build the app for production and drive a real browser against real server processes, each with its own throwaway SQLite database under `.test-data/`. Integrations run against local fakes (SMTP, OIDC, S3, Immich, Paperless, ntfy), so no external services are needed.
 
@@ -340,7 +256,7 @@ CI runs lint, type checks, unit tests, and the e2e suite (sharded four ways) on 
 
 ---
 
-## User management
+## User Management
 
 - First run redirects to `/setup` to create the initial admin account (one-time only)
 - Manage users at `/admin/users`: create accounts, reset passwords, deactivate users
@@ -348,75 +264,9 @@ CI runs lint, type checks, unit tests, and the e2e suite (sharded four ways) on 
 
 ---
 
-## OIDC / SSO (optional)
+## Two-Factor Authentication (2FA)
 
-EinVault supports OpenID Connect for SSO with providers like Authelia, Authentik, Keycloak, and PocketID. OIDC runs alongside password login; existing users keep their passwords. A "Sign in with {provider}" button appears on the login page when OIDC is configured.
-
-OIDC is **disabled** unless all required variables are set. Add them to your `.env` (local) or compose file (production), then restart.
-
-Register `https://<your-domain>/auth/oidc/callback` as an allowed redirect URI with your IdP first.
-
-### Required variables
-
-| Variable             | Description                                                                                                     |
-| -------------------- | --------------------------------------------------------------------------------------------------------------- |
-| `OIDC_ISSUER_URL`    | IdP base URL. Discovery happens at `<issuer>/.well-known/openid-configuration`. e.g. `https://auth.example.com` |
-| `OIDC_CLIENT_ID`     | Client ID registered with your IdP.                                                                             |
-| `OIDC_CLIENT_SECRET` | Client secret. Omit for public clients (PKCE-only).                                                             |
-| `OIDC_REDIRECT_URI`  | Must match what's registered with the IdP. e.g. `https://einvault.yourdomain.com/auth/oidc/callback`            |
-
-### Optional variables
-
-| Variable                        | Default                | Description                                                                                                       |
-| ------------------------------- | ---------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| `OIDC_SCOPES`                   | `openid profile email` | Space-separated scopes requested from the IdP.                                                                    |
-| `OIDC_PROVIDER_NAME`            | `SSO`                  | Display label on the login button.                                                                                |
-| `OIDC_ALLOW_SIGNUP`             | `false`                | If `true`, auto-creates accounts for users who authenticate but have no matching record. See below.               |
-| `OIDC_DEFAULT_ROLE`             | `member`               | Role assigned to auto-created users. Allowed: `member`, `caretaker`. Admin can only be granted via groups.        |
-| `OIDC_ADMIN_GROUPS`             | _(unset)_              | Comma-separated. Users whose `groups` claim contains any value here are promoted to admin on every login.         |
-| `OIDC_POST_LOGOUT_REDIRECT_URI` | _(unset)_              | If set and the IdP advertises `end_session_endpoint`, logout triggers RP-initiated logout at the IdP.             |
-| `OIDC_STATE_SECRET`             | _(random)_             | Pin a long random string. Without it, in-flight logins break across server restarts.                              |
-| `OIDC_ALLOW_INSECURE_HTTP`      | `false`                | Allows plain-HTTP issuer URLs. Exists for automated tests against a local mock IdP. Never set this in production. |
-
-### Account linking
-
-The callback decides which account to use in this order:
-
-1. **Match by OIDC subject.** If the user has logged in via OIDC before, link by stored `(issuer, subject)`.
-2. **Match by verified email.** If `email_verified` is `true` and the email matches an existing user, link the OIDC subject to that account.
-3. **Auto-create.** Only if `OIDC_ALLOW_SIGNUP=true`. Username taken from `preferred_username` claim (sanitised, with numeric suffix on collision), or email local-part as fallback.
-4. **Reject.** Otherwise, the user is returned to the login page with an "account not provisioned" message. An admin must create the account first.
-
-By default (`OIDC_ALLOW_SIGNUP=false`), users must already exist in EinVault, or share an email with an existing account, to log in.
-
-### Admin role mapping
-
-If `OIDC_ADMIN_GROUPS` is set, the user's `groups` claim is checked on **every** login. Membership in any listed group sets the user's role to `admin`; absence demotes them to the default role. Revoking admin at the IdP takes effect on next login.
-
-If `OIDC_ADMIN_GROUPS` is unset, OIDC does not touch user roles. Roles set in EinVault's admin UI are preserved across SSO logins.
-
-`OIDC_DEFAULT_ROLE` cannot grant admin; allowed values are `member` and `caretaker`.
-
-Group membership is read from the top-level `groups` claim in the ID token, as an array of strings (a single string also works). Other claim names (`roles`, Keycloak's `realm_access.roles`) and nested claims aren't read. Configure your IdP to emit `groups` directly. See provider notes below.
-
-### Logout
-
-By default, logout destroys the local EinVault session and returns the user to `/auth/login`. Set `OIDC_POST_LOGOUT_REDIRECT_URI` (and register it with your IdP) to also end the IdP session via [RP-initiated logout](https://openid.net/specs/openid-connect-rpinitiated-1_0.html).
-
-### Provider notes
-
-| Provider      | Notes                                                                                                                                                                                               |
-| ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Authelia**  | Register the redirect URI under the OIDC client config. Set `client_secret_basic` (default) or `none` for public clients.                                                                           |
-| **Authentik** | Create an OAuth2/OIDC provider; scope mapping for `groups` is built-in. `OIDC_ADMIN_GROUPS` matches the `groups` claim directly.                                                                    |
-| **Keycloak**  | Add a "Group Membership" mapper to the client with token claim name `groups` and "Full group path" off. EinVault does not read `realm_access.roles`. Add the redirect URI to "Valid Redirect URIs". |
-| **PocketID**  | Public-client first; omit `OIDC_CLIENT_SECRET`. Register the redirect URI in the client settings.                                                                                                   |
-
----
-
-## Two-factor authentication (2FA)
-
-EinVault supports per-user TOTP-based two-factor authentication. Users can enable it under Settings → Security: scan the QR code with any TOTP app (Aegis, Bitwarden Authenticator, Google Authenticator, etc.), enter the confirmation code, and download the 10 one-time backup codes. Each backup code works once and is not shown again.
+EinVault supports per-user TOTP-based two-factor authentication. Users can enable it under Settings → Security: scan the QR code with any TOTP app (Aegis, Bitwarden Authenticator, Google Authenticator, etc.), enter the confirmation code, and download the 10 one-time backup codes.
 
 **Requirements.** 2FA requires `TWOFA_ENC_KEY` to be set. This is a 32-byte base64 key used to encrypt stored TOTP secrets at rest. Without it, 2FA is unavailable and the enforcement setting in the admin panel is locked.
 
@@ -426,48 +276,12 @@ Generate a key:
 openssl rand -base64 32
 ```
 
-Add it to your compose file or `.env`:
-
-```
-TWOFA_ENC_KEY=<the generated value>
-```
-
-**Admin enforcement.** Admins can require 2FA at Admin → Users → Security. Three levels are available:
-
-- **Off** — 2FA is optional. Users can enable it but are not required to.
-- **Admins only** — Admin accounts must enroll before they can use the app.
-- **Everyone** — All non-OIDC accounts must enroll.
-
-When enforcement is active, un-enrolled users are redirected to `/2fa-setup` after login and cannot access the rest of the app until they complete enrollment.
-
-**OIDC users are exempt.** Accounts that sign in via OIDC are never required to enroll. MFA for those accounts is handled by the identity provider.
-
-**Recovery.** If a user loses their authenticator app, they can sign in using one of their backup codes instead. If backup codes are also lost, an admin can reset the user's two-factor enrollment from the Manage drawer (Admin → Users → Manage → Reset two-factor). The user will be prompted to re-enroll on next login.
-
----
-
-## Adding a new locale
-
-1. Copy `src/lib/i18n/en.ts` to `src/lib/i18n/{code}.ts` (e.g. `ja.ts`) and translate every value. The file must `export default { ... } satisfies Record<keyof Messages, string>` — the compiler will catch any missing keys.
-2. In `src/lib/i18n/index.ts`: import the new file, add the code to the `Locale` type, `SUPPORTED_LOCALES`, `LOCALE_LABELS`, and `catalogs`.
-3. In `src/lib/server/db/schema.ts`: add the code to the `locale` enum on the `users` table.
-
-No migration is needed — SQLite text columns don't enforce enums at the database level.
-
-> **Note:** Non-English translations were generated by Claude (Anthropic) and may contain errors. Corrections via pull request are welcome.
-
----
-
-## Stack
-
-- **SvelteKit:** full-stack TypeScript framework with file-based routing
-- **SQLite + Drizzle ORM:** local-first, portable database
-- **Tailwind CSS:** utility-first styling with custom components
-- **Session-based auth:** custom sessions with bcryptjs password hashing; optional OIDC SSO via [`openid-client`](https://github.com/panva/openid-client)
-- **Docker:** multi-stage, hardened single-container deployment
+Add it to your compose file or `.env`.
 
 ---
 
 ## License
 
-MIT. See [LICENSE](LICENSE).
+[MIT](./LICENSE)
+
+<p align="right">(<a href="#readme-top">back to top</a>)

@@ -3,6 +3,7 @@ build/
 node_modules/
 
 # Environment
+venv/
 .env
 .env.*
 !.env.example
