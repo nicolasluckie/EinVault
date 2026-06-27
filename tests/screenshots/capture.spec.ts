@@ -27,17 +27,7 @@ const SHOTS: Shot[] = [
 	{ name: 'member_companion', role: 'member', path: `/${EIN}` },
 	{ name: 'member_companion_mobile', role: 'member', path: `/${EIN}`, mobile: true },
 	{ name: 'member_health', role: 'member', path: `/${EIN}/health` },
-	{ name: 'member_admin', role: 'admin', path: '/admin/users' },
-	{ name: 'caretaker_dashboard', role: 'caretaker', path: `/care/${EIN}` },
-	{ name: 'caretaker_dashboard_mobile', role: 'caretaker', path: `/care/${EIN}`, mobile: true },
-	{
-		name: 'caretaker_journal_mobile',
-		role: 'caretaker',
-		path: `/care/${EIN}/journal`,
-		mobile: true
-	},
-	{ name: 'caretaker_log', role: 'caretaker', path: `/care/${EIN}/log` },
-	{ name: 'caretaker_settings', role: 'caretaker', path: '/care/settings' }
+	{ name: 'member_admin', role: 'admin', path: '/admin/users' }
 ];
 
 const DESKTOP = { width: 1280, height: 900 };

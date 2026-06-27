@@ -2,7 +2,7 @@ import { fail, redirect } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
 import { t } from '$lib/i18n';
 import { db, schema } from '$lib/server/db';
-import { eq, gte, and, lte, isNull } from 'drizzle-orm';
+import { eq, and, isNull } from 'drizzle-orm';
 import { localDateISO } from '$lib/date';
 import { completeReminder } from '$lib/server/reminders';
 import { healthEventPrefillUrl, REMINDER_TO_HEALTH_TYPE } from '$lib/health';
@@ -19,7 +19,6 @@ export const load: PageServerLoad = async ({ params, locals, parent }) => {
 		upcomingReminders,
 		recentWeights,
 		todayJournal,
-		activeCaretakerShift,
 		recentDocuments
 	] = await Promise.all([
 		db.query.healthEvents.findMany({
@@ -56,28 +55,6 @@ export const load: PageServerLoad = async ({ params, locals, parent }) => {
 			),
 			with: { logger: { columns: { displayName: true } } }
 		}),
-		db
-			.select({
-				shiftId: schema.caretakerShifts.id,
-				startAt: schema.caretakerShifts.startAt,
-				endAt: schema.caretakerShifts.endAt,
-				notes: schema.caretakerShifts.notes,
-				displayName: schema.users.displayName,
-				phone: schema.users.phone,
-				email: schema.users.email
-			})
-			.from(schema.caretakerShifts)
-			.innerJoin(
-				schema.companionCaretakers,
-				and(
-					eq(schema.companionCaretakers.userId, schema.caretakerShifts.userId),
-					eq(schema.companionCaretakers.companionId, params.companionId)
-				)
-			)
-			.innerJoin(schema.users, eq(schema.users.id, schema.caretakerShifts.userId))
-			.where(and(lte(schema.caretakerShifts.startAt, now), gte(schema.caretakerShifts.endAt, now)))
-			.limit(1)
-			.then((rows) => rows[0] ?? null),
 		db.query.documents.findMany({
 			where: eq(schema.documents.companionId, params.companionId),
 			orderBy: (d, { desc }) => [desc(d.createdAt)],
@@ -92,7 +69,6 @@ export const load: PageServerLoad = async ({ params, locals, parent }) => {
 		upcomingReminders,
 		recentWeights,
 		todayJournal,
-		activeCaretakerShift,
 		recentDocuments
 	};
 };

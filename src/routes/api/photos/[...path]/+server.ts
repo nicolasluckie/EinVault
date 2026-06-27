@@ -2,7 +2,7 @@ import { error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { t } from '$lib/i18n';
 import { db, schema } from '$lib/server/db';
-import { eq, and } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 import { getStorage, type GetResult } from '$lib/server/storage';
 
 // URL shape: /api/photos/journal/{companionId}/{date}/{filename}
@@ -31,20 +31,9 @@ export const GET: RequestHandler = async ({ params, url, locals, request }) => {
 		error(404, t(locals.locale, 'error.notFound'));
 	}
 
-	// For caretakers, verify they are assigned to the companion that owns this photo
-	if (locals.user.role === 'caretaker') {
-		const assignment = await db.query.companionCaretakers.findFirst({
-			where: and(
-				eq(schema.companionCaretakers.companionId, photo.entry.companionId),
-				eq(schema.companionCaretakers.userId, locals.user.id)
-			)
-		});
-		if (!assignment) error(403, t(locals.locale, 'error.forbidden'));
-	}
-
 	// `?poster` serves the transcoded video's generated poster JPEG instead of the
 	// media itself. The poster key comes from the row (resolved after the same
-	// companion/date/caretaker scoping above), never from the client, so it can't
+	// companion/date scoping above), never from the client, so it can't
 	// be used to read another companion's object. The kept original (originalKey)
 	// is deliberately never served by any route.
 	const wantPoster = url.searchParams.has('poster');

@@ -19,21 +19,16 @@ describe('seedRows', () => {
 	beforeEach(async () => {
 		// Each test needs a clean slate. The test DB is shared within this file,
 		// so clear seeded tables before each test (cascade deletes handle children).
-		await db.delete(schema.caretakerShifts);
-		await db.delete(schema.companionCaretakers);
 		await db.delete(schema.companions);
 		await db.delete(schema.users);
 	});
 
-	it('populates the Bebop dataset including an active caretaker shift', async () => {
+	it('populates the Bebop dataset', async () => {
 		seedRows(db as never, { now: 1_700_000_000_000 });
 		const users = await db.query.users.findMany();
 		const usernames = users.map((u) => u.username).sort();
 		expect(usernames).toContain(SEED.admin.username); // spike
 		expect(usernames).toContain(SEED.member.username); // jet
-		expect(usernames).toContain(SEED.caretaker.username); // faye
-		const shifts = await db.query.caretakerShifts.findMany();
-		expect(shifts.some((s) => s.id === 'seed-shift-active')).toBe(true);
 	});
 
 	it('seeds a rich dataset: photos, varied moods, weight trend, mixed reminders', async () => {
@@ -83,16 +78,14 @@ describe('seedRows', () => {
 
 describe('ensureDemoUsers', () => {
 	beforeEach(async () => {
-		await db.delete(schema.caretakerShifts);
-		await db.delete(schema.companionCaretakers);
 		await db.delete(schema.companions);
 		await db.delete(schema.users);
 	});
 
-	it('inserts four demo users on first call', async () => {
+	it('inserts three demo users on first call', async () => {
 		const { ensureDemoUsers } = await import('$server/db/demo-seed');
 		const inserted = await ensureDemoUsers(db);
-		expect(inserted).toBe(4);
+		expect(inserted).toBe(3);
 		const users = await db.query.users.findMany();
 		expect(users.map((u) => u.id)).toContain(SEED.admin.id);
 	});
@@ -111,8 +104,6 @@ describe('refreshDemoContent', () => {
 	const DATA_DIR = '/tmp/einvault-demo-test';
 
 	beforeEach(async () => {
-		await db.delete(schema.caretakerShifts);
-		await db.delete(schema.companionCaretakers);
 		await db.delete(schema.companions);
 		await db.delete(schema.users);
 	});

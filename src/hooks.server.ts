@@ -15,7 +15,6 @@ import {
 	logVideoTranscodeBootStatus,
 	logSmtpBootStatus,
 	logNtfyBootStatus,
-	logTwoFactorBootStatus,
 	logDemoBootStatus
 } from '$lib/server/env';
 import { isDemoBlockedRequest } from '$lib/server/demo';
@@ -23,7 +22,7 @@ import { DATA_DIR } from '$lib/server/paths';
 import { recoverAndStart } from '$lib/server/video/worker';
 import { startNotifyScheduler } from '$lib/server/notify/scheduler';
 import { getAppSettings } from '$lib/server/app-settings';
-import { requiresTwoFactor } from '$lib/server/auth/two-factor';
+import { bootstrapAdminUser } from '$lib/server/auth/bootstrap';
 
 logOidcBootStatus();
 logStorageBootStatus();
@@ -34,12 +33,16 @@ logVideoTranscodeBootStatus();
 logSmtpBootStatus();
 logNtfyBootStatus();
 logDemoBootStatus();
-logTwoFactorBootStatus();
 
 // Resume any transcode jobs interrupted by a restart and drain the queue. No-op
 // unless VIDEO_TRANSCODE is enabled and ffmpeg is present. Fire and forget.
 recoverAndStart();
 startNotifyScheduler();
+
+// Bootstrap admin user from environment variables
+if (!DEMO_MODE) {
+	bootstrapAdminUser().catch((err) => console.error('[bootstrap] failed:', err));
+}
 
 if (DEMO_MODE) {
 	Promise.all([import('./lib/server/db'), import('./lib/server/db/demo-seed')])
@@ -141,34 +144,6 @@ const authContext: Handle = async ({ event, resolve }) => {
 	return resolve(event);
 };
 
-const twoFactorGate: Handle = async ({ event, resolve }) => {
-	// Demo is read-only and uses shared passwordless accounts: 2FA is meaningless
-	// and enrollment (a write) is blocked anyway, so never trap demo users at
-	// /2fa-setup regardless of the app's require2fa setting.
-	if (DEMO_MODE) return resolve(event);
-	const user = event.locals.user;
-	if (user) {
-		const path = event.url.pathname;
-		const allowed =
-			path === '/2fa-setup' || path.startsWith('/2fa-setup/') || path.startsWith('/auth/');
-		if (!allowed) {
-			const { require2fa } = await getAppSettings();
-			if (
-				requiresTwoFactor(
-					{ role: user.role, isOidc: user.isOidc, totpEnabled: user.totpEnabled },
-					require2fa
-				)
-			) {
-				if (path.startsWith('/api/')) {
-					return new Response('Two-factor authentication required', { status: 403 });
-				}
-				redirect(303, '/2fa-setup');
-			}
-		}
-	}
-	return resolve(event);
-};
-
 const demoReadOnly: Handle = async ({ event, resolve }) => {
 	if (DEMO_MODE && isDemoBlockedRequest(event.request.method, event.url.pathname)) {
 		if (event.url.pathname.startsWith('/api')) {
@@ -234,7 +209,6 @@ const localeDetect: Handle = async ({ event, resolve }) => {
 export const handle = sequence(
 	securityHeaders,
 	authContext,
-	twoFactorGate,
 	demoReadOnly,
 	localeDetect
 );

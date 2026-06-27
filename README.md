@@ -23,10 +23,9 @@
 - **Health tracking** — vet visits, vaccinations, medications, procedures, and weight history
 - **Activity logging** — walks, meals, bathroom trips, treats, play sessions, and grooming
 - **Reminders** — recurring and one-time reminders for medications, vaccinations, grooming, and more
-- **Search** — full-text search across journals, health, activity, reminders, documents, and media, with `@companion`, `#type`, and date-range filters (members and admins)
-- **Calendar feed** — subscribe to health events, reminders (with recurrence), and shifts from any calendar app or Home Assistant via a personal, revocable ICS URL
-- **Caretaker shifts** — schedule work shifts and export to calendar via iCalendar (.ics)
-- **Role-based access** — admins manage the app, members track health, caretakers log activities
+- **Search** — full-text search across journals, health, activity, reminders, documents, and media, with `@companion`, `#type`, and date-range filters
+- **Calendar feed** — subscribe to health events and reminders (with recurrence) from any calendar app or Home Assistant via a personal, revocable ICS URL
+- **Single-admin access** — one admin user manages the app and tracks all companion data
 - **Self-contained** — single Docker container, SQLite database, no external dependencies
 - **Localization** — English, German, Spanish, French, Italian, and Portuguese (non-English translations are AI-generated and may contain errors)
 - **Responsive UI** — works on desktop and mobile, with dark and light mode support
@@ -56,7 +55,7 @@
 
 1. Clone the repo:
    ```bash
-   git clone https://github.com/nicolasluckie/EinVault.git
+   git clone https://github.com/yourorg/EinVault.git
    cd EinVault
    ```
 
@@ -76,7 +75,7 @@
    npm run dev
    ```
 
-The app will be available at `http://localhost:5173`. Open it and follow the `/setup` prompt to create your admin account.
+The app will be available at `http://localhost:5173`. Set `ADMIN_USERNAME` and `ADMIN_PASSWORD_HASH` environment variables to provision the admin user on startup.
 
 ---
 
@@ -163,7 +162,8 @@ All the same env vars work here. `ORIGIN` defaults to `http://localhost:3000` so
 | `CALENDAR_FEED_ENABLED` | Set `false` to disable the calendar feed endpoint | `true` |
 | `DEMO_MODE` | Enable read-only public demo mode | `false` |
 | `DATABASE_URL` | Database path inside the container | `/data/einvault.db` |
-| `TWOFA_ENC_KEY` | 32-byte base64 key for encrypting TOTP secrets | — |
+| `ADMIN_USERNAME` | Admin username for login | — |
+| `ADMIN_PASSWORD_HASH` | Bcrypt hash of admin password (generate with: `node -e "require('bcryptjs').hash('yourpassword',12).then(console.log)"`) | — |
 
 ### Optional Integrations
 

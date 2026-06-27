@@ -195,20 +195,6 @@ test.describe('global search palette', () => {
 		await expect(lightbox).toBeVisible({ timeout: 8_000 });
 	});
 
-	test('caretaker gets 403 on /api/search and has no search button', async ({
-		asCaretaker,
-		app,
-		browser
-	}) => {
-		// API returns 403 for caretaker
-		const res = await asCaretaker.request.get('/api/search?q=seed');
-		expect(res.status()).toBe(403);
-
-		// The caretaker layout (/care) must not have an "Open search" button
-		await asCaretaker.goto('/care');
-		await expect(asCaretaker.getByRole('button', { name: 'Open search' })).toHaveCount(0);
-	});
-
 	test('anonymous request to /api/search returns 401', async ({ app, browser }) => {
 		const ctx = await browser.newContext({ baseURL: app.server.baseURL });
 		const res = await ctx.request.get('/api/search?q=seed');
@@ -401,10 +387,5 @@ test.describe('global search palette', () => {
 		await expect(
 			dialog.locator('#search-results').getByText('Journal', { exact: true })
 		).toBeVisible({ timeout: 8_000 });
-	});
-
-	test('caretaker gets 403 on /api/search with type filter', async ({ asCaretaker }) => {
-		const res = await asCaretaker.request.get('/api/search?q=seed&type=health');
-		expect(res.status()).toBe(403);
 	});
 });

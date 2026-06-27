@@ -8,7 +8,7 @@ import { seedRows, copyDemoPhotoFiles } from '../../src/lib/server/db/demo-seed'
 
 export { SEED } from '../../src/lib/server/db/demo-seed';
 
-export type Role = 'admin' | 'member' | 'caretaker';
+export type Role = 'admin' | 'member';
 
 const MIGRATIONS_FOLDER = path.resolve(import.meta.dirname, '../../drizzle');
 
@@ -32,21 +32,6 @@ export function createSeededDb(dir: string): string {
 	copyDemoPhotoFiles(path.join(dir, 'uploads'), now);
 
 	sqlite.close(); // clean WAL handoff before the server opens the file
-	return dbPath;
-}
-
-/**
- * Like createSeededDb but omits the active caretaker shift.
- * Use for off-shift caretaker tests that need a dedicated per-test server.
- */
-export function createSeededDbNoShift(dir: string): string {
-	const dbPath = createSeededDb(dir);
-	// Re-open just to delete the active shift row, then close cleanly.
-	const sqlite = new Database(dbPath);
-	sqlite.pragma('journal_mode = WAL');
-	sqlite.pragma('foreign_keys = ON');
-	sqlite.prepare("DELETE FROM caretaker_shifts WHERE id = 'seed-shift-active'").run();
-	sqlite.close();
 	return dbPath;
 }
 

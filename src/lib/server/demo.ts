@@ -1,12 +1,11 @@
 import { SEED } from '$server/db/demo-seed';
 
-export const DEMO_ROLES = ['admin', 'member', 'caretaker'] as const;
+export const DEMO_ROLES = ['admin', 'member'] as const;
 export type DemoRole = (typeof DEMO_ROLES)[number];
 
 const ROLE_TO_USER_ID: Record<DemoRole, string> = {
 	admin: SEED.admin.id,
-	member: SEED.member.id,
-	caretaker: SEED.caretaker.id
+	member: SEED.member.id
 };
 
 export function demoUserIdForRole(role: string): string | null {

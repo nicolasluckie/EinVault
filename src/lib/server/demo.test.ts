@@ -3,17 +3,16 @@ import { demoUserIdForRole, isDemoBlockedRequest, DEMO_ROLES } from '$server/dem
 import { SEED } from '$server/db/demo-seed';
 
 describe('demoUserIdForRole', () => {
-	it('maps the three roles to their Bebop seed users', () => {
+	it('maps the two roles to their Bebop seed users', () => {
 		expect(demoUserIdForRole('admin')).toBe(SEED.admin.id);
 		expect(demoUserIdForRole('member')).toBe(SEED.member.id);
-		expect(demoUserIdForRole('caretaker')).toBe(SEED.caretaker.id);
 	});
 	it('rejects unknown roles', () => {
 		expect(demoUserIdForRole('superuser')).toBeNull();
 		expect(demoUserIdForRole('')).toBeNull();
 	});
-	it('exposes exactly the three demo roles', () => {
-		expect([...DEMO_ROLES]).toEqual(['admin', 'member', 'caretaker']);
+	it('exposes exactly the two demo roles', () => {
+		expect([...DEMO_ROLES]).toEqual(['admin', 'member']);
 	});
 });
 

@@ -11,7 +11,7 @@ import { env } from '$env/dynamic/private';
 import { t } from '$lib/i18n';
 import { db, schema } from '$lib/server/db';
 import { isMailEnabled, sendMail } from '$lib/server/mail';
-import { buildReminderEmail, buildShiftEmail, formatWhen } from '$lib/server/mail/templates';
+import { buildReminderEmail, formatWhen } from '$lib/server/mail/templates';
 import { isNtfyEnabled, sendNtfy } from './ntfy';
 import {
 	claimNext,
@@ -22,7 +22,6 @@ import {
 	markSkipped,
 	recoverOrphanedClaims,
 	reminderDedupeKey,
-	shiftDedupeKey,
 	type ClaimedNotification,
 	type EnqueueRow
 } from './outbox';
@@ -37,8 +36,6 @@ const SCAN_INTERVAL_MS = (() => {
 // notification. Without it, enabling the feature on an existing install would
 // email every historically overdue reminder at once.
 const CATCH_UP_MS = 24 * 60 * 60 * 1000;
-// Shift alerts fire when a boundary (start or end) enters this window.
-const SHIFT_LEAD_MS = 24 * 60 * 60 * 1000;
 
 let timer: ReturnType<typeof setInterval> | null = null;
 let scanning = false;
@@ -57,7 +54,7 @@ interface Recipient {
  * site: email rows need flag && email, ntfy rows need a topic.
  */
 async function categoryRecipients(
-	flagColumn: typeof schema.users.notifyReminderEmail | typeof schema.users.notifyShiftEmail
+	flagColumn: typeof schema.users.notifyReminderEmail
 ): Promise<Recipient[]> {
 	return db
 		.select({
@@ -92,22 +89,12 @@ async function produceReminders(now: Date): Promise<EnqueueRow[]> {
 	if (due.length === 0) return [];
 
 	const recipients = await categoryRecipients(schema.users.notifyReminderEmail);
-	// Caretakers are eligible only for companions they are assigned to. Shift
-	// status is deliberately ignored: assigned means notified (product call —
-	// a reminder due off-shift is still that caretaker's companion).
-	const assignments = await db.query.companionCaretakers.findMany();
-	const assigned = new Set(assignments.map((a) => `${a.companionId}:${a.userId}`));
 
 	const mailOn = isMailEnabled();
 	const ntfyOn = isNtfyEnabled();
 	const rows: EnqueueRow[] = [];
 	for (const reminder of due) {
 		for (const user of recipients) {
-			// Same visibility scope for every channel: caretakers only for
-			// companions assigned to them. Shift status is deliberately ignored.
-			if (user.role === 'caretaker' && !assigned.has(`${reminder.companionId}:${user.id}`)) {
-				continue;
-			}
 			const payload = {
 				kind: 'reminderDue' as const,
 				reminderId: reminder.id,
@@ -134,73 +121,9 @@ async function produceReminders(now: Date): Promise<EnqueueRow[]> {
 	return rows;
 }
 
-/**
- * Shifts whose start or end falls within the next 24h → one outbox row per
- * recipient per boundary. Recipients: opted-in admins/members plus the
- * shift's own caretaker (their shift, their alert). Other caretakers never.
- * Windows are future-only (boundary > now), so a boundary that slipped past
- * while the app was down simply never alerts — no stale notifications.
- */
-async function produceShifts(now: Date): Promise<EnqueueRow[]> {
-	const horizon = new Date(now.getTime() + SHIFT_LEAD_MS);
-	const upcoming = await db
-		.select({
-			id: schema.caretakerShifts.id,
-			userId: schema.caretakerShifts.userId,
-			startAt: schema.caretakerShifts.startAt,
-			endAt: schema.caretakerShifts.endAt
-		})
-		.from(schema.caretakerShifts)
-		.where(
-			and(gt(schema.caretakerShifts.endAt, now), lte(schema.caretakerShifts.startAt, horizon))
-		);
-	if (upcoming.length === 0) return [];
-
-	const recipients = await categoryRecipients(schema.users.notifyShiftEmail);
-
-	const mailOn = isMailEnabled();
-	const ntfyOn = isNtfyEnabled();
-	const rows: EnqueueRow[] = [];
-	for (const shift of upcoming) {
-		const boundaries: Array<{ kind: 'shiftStart' | 'shiftEnd'; at: Date }> = [
-			{ kind: 'shiftStart', at: shift.startAt },
-			{ kind: 'shiftEnd', at: shift.endAt }
-		];
-		for (const b of boundaries) {
-			if (b.at <= now || b.at > horizon) continue;
-			for (const user of recipients) {
-				// Admins/members always; among caretakers only the shift owner.
-				if (user.role === 'caretaker' && user.id !== shift.userId) continue;
-				const payload = {
-					kind: b.kind,
-					shiftId: shift.id,
-					boundaryEpoch: Math.floor(b.at.getTime() / 1000)
-				};
-				if (mailOn && user.flag && user.email) {
-					rows.push({
-						dedupeKey: shiftDedupeKey(shift.id, b.kind, b.at, user.id, 'email'),
-						userId: user.id,
-						channel: 'email',
-						payload
-					});
-				}
-				if (ntfyOn && user.ntfyTopic) {
-					rows.push({
-						dedupeKey: shiftDedupeKey(shift.id, b.kind, b.at, user.id, 'ntfy'),
-						userId: user.id,
-						channel: 'ntfy',
-						payload
-					});
-				}
-			}
-		}
-	}
-	return rows;
-}
-
 async function produce(): Promise<void> {
 	const now = new Date();
-	const rows = [...(await produceReminders(now)), ...(await produceShifts(now))];
+	const rows = await produceReminders(now);
 	const fresh = await enqueue(rows);
 	if (fresh > 0) console.info(`[notify] enqueued ${fresh} notification(s)`);
 }
@@ -246,18 +169,6 @@ async function deliverReminder(
 		await markSkipped(row.id);
 		return;
 	}
-	if (user.role === 'caretaker') {
-		const stillAssigned = await db.query.companionCaretakers.findFirst({
-			where: and(
-				eq(schema.companionCaretakers.companionId, reminder.companionId),
-				eq(schema.companionCaretakers.userId, user.id)
-			)
-		});
-		if (!stillAssigned) {
-			await markSkipped(row.id);
-			return;
-		}
-	}
 	const companion = await db.query.companions.findFirst({
 		where: eq(schema.companions.id, reminder.companionId)
 	});
@@ -272,65 +183,6 @@ async function deliverReminder(
 		{ displayName: user.displayName, email: user.email },
 		{ title: reminder.title, description: reminder.description, dueAt: reminder.dueAt },
 		companion.name,
-		link
-	);
-	await sendMail(message);
-	await markSent(row.id);
-}
-
-async function deliverShift(
-	row: ClaimedNotification,
-	payload: { kind: 'shiftStart' | 'shiftEnd'; shiftId: string; boundaryEpoch: number }
-): Promise<void> {
-	const shift = await db.query.caretakerShifts.findFirst({
-		where: eq(schema.caretakerShifts.id, payload.shiftId)
-	});
-	if (!shift) {
-		await markSkipped(row.id);
-		return;
-	}
-	const boundary = payload.kind === 'shiftStart' ? shift.startAt : shift.endAt;
-	// The row was created for a specific boundary time. If the shift has been
-	// rescheduled since, this row is moot — the producer creates a fresh row
-	// (new dedupe key) when the new time enters the window.
-	if (Math.floor(boundary.getTime() / 1000) !== payload.boundaryEpoch) {
-		await markSkipped(row.id);
-		return;
-	}
-	// Boundary already passed: alert is stale, drop it silently.
-	if (boundary.getTime() <= Date.now()) {
-		await markSkipped(row.id);
-		return;
-	}
-	const user = await eligibleRecipient(row.userId);
-	if (!user || !user.email || !user.notifyShiftEmail) {
-		await markSkipped(row.id);
-		return;
-	}
-	// Symmetry with deliverReminder's assignment re-check: a user demoted to
-	// caretaker after enqueue must not receive another caretaker's shift alert.
-	if (user.role === 'caretaker' && user.id !== shift.userId) {
-		await markSkipped(row.id);
-		return;
-	}
-	const caretaker = await db.query.users.findFirst({
-		where: eq(schema.users.id, shift.userId),
-		columns: { displayName: true }
-	});
-	if (!caretaker) {
-		await markSkipped(row.id);
-		return;
-	}
-
-	// Caretaker lands on their dashboard; admins/members on home (they cannot
-	// open /care).
-	const link = publicLink(user.role === 'caretaker' ? '/care' : '/');
-	const message = buildShiftEmail(
-		user.locale,
-		{ displayName: user.displayName, email: user.email },
-		payload.kind,
-		caretaker.displayName,
-		{ startAt: shift.startAt, endAt: shift.endAt },
 		link
 	);
 	await sendMail(message);
@@ -357,18 +209,6 @@ async function deliverReminderNtfy(
 		await markSkipped(row.id);
 		return;
 	}
-	if (user.role === 'caretaker') {
-		const stillAssigned = await db.query.companionCaretakers.findFirst({
-			where: and(
-				eq(schema.companionCaretakers.companionId, reminder.companionId),
-				eq(schema.companionCaretakers.userId, user.id)
-			)
-		});
-		if (!stillAssigned) {
-			await markSkipped(row.id);
-			return;
-		}
-	}
 	const companion = await db.query.companions.findFirst({
 		where: eq(schema.companions.id, reminder.companionId)
 	});
@@ -381,59 +221,6 @@ async function deliverReminderNtfy(
 		title: t(user.locale, 'email.reminder.subject', { title: reminder.title }),
 		message: `${t(user.locale, 'email.reminder.body', { companion: companion.name, title: reminder.title })}\n${t(user.locale, 'email.reminder.dueLine', { due: formatWhen(user.locale, reminder.dueAt) })}`,
 		click: publicLink(`/${companion.id}/reminders`)
-	});
-	await markSent(row.id);
-}
-
-async function deliverShiftNtfy(
-	row: ClaimedNotification,
-	payload: { kind: 'shiftStart' | 'shiftEnd'; shiftId: string; boundaryEpoch: number }
-): Promise<void> {
-	const shift = await db.query.caretakerShifts.findFirst({
-		where: eq(schema.caretakerShifts.id, payload.shiftId)
-	});
-	if (!shift) {
-		await markSkipped(row.id);
-		return;
-	}
-	const boundary = payload.kind === 'shiftStart' ? shift.startAt : shift.endAt;
-	if (Math.floor(boundary.getTime() / 1000) !== payload.boundaryEpoch) {
-		await markSkipped(row.id);
-		return;
-	}
-	if (boundary.getTime() <= Date.now()) {
-		await markSkipped(row.id);
-		return;
-	}
-	const user = await eligibleRecipient(row.userId);
-	if (!user || !user.ntfyTopic) {
-		await markSkipped(row.id);
-		return;
-	}
-	if (user.role === 'caretaker' && user.id !== shift.userId) {
-		await markSkipped(row.id);
-		return;
-	}
-	const caretaker = await db.query.users.findFirst({
-		where: eq(schema.users.id, shift.userId),
-		columns: { displayName: true }
-	});
-	if (!caretaker) {
-		await markSkipped(row.id);
-		return;
-	}
-
-	const subjectKey =
-		payload.kind === 'shiftStart' ? 'email.shift.startSubject' : 'email.shift.endSubject';
-	const bodyKey = payload.kind === 'shiftStart' ? 'email.shift.startBody' : 'email.shift.endBody';
-	const bodyParams: Record<string, string> =
-		payload.kind === 'shiftStart'
-			? { caretaker: caretaker.displayName, start: formatWhen(user.locale, shift.startAt) }
-			: { caretaker: caretaker.displayName, end: formatWhen(user.locale, shift.endAt) };
-	await sendNtfy(user.ntfyTopic, {
-		title: t(user.locale, subjectKey, { caretaker: caretaker.displayName }),
-		message: t(user.locale, bodyKey, bodyParams),
-		click: publicLink(user.role === 'caretaker' ? '/care' : '/')
 	});
 	await markSent(row.id);
 }
@@ -452,13 +239,15 @@ async function drain(): Promise<void> {
 				if (row.payload.kind === 'reminderDue') {
 					await deliverReminder(row, row.payload);
 				} else {
-					await deliverShift(row, row.payload);
+					console.error(`[notify] unknown payload kind '${row.payload.kind}'; skipping row ${row.id}`);
+					await markSkipped(row.id);
 				}
 			} else if (row.channel === 'ntfy') {
 				if (row.payload.kind === 'reminderDue') {
 					await deliverReminderNtfy(row, row.payload);
 				} else {
-					await deliverShiftNtfy(row, row.payload);
+					console.error(`[notify] unknown payload kind '${row.payload.kind}'; skipping row ${row.id}`);
+					await markSkipped(row.id);
 				}
 			} else {
 				// apprise lands in a later PR.

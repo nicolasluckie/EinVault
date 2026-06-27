@@ -368,16 +368,6 @@ function readSmtpConfig(): { config: SmtpConfig | null; missing: string[] } {
 const smtpResult = readSmtpConfig();
 export const SMTP_CONFIG = smtpResult.config;
 
-export function logTwoFactorBootStatus(): void {
-	import('$lib/server/auth/totp-crypto').then(({ isTwoFactorConfigured }) => {
-		console.info(
-			isTwoFactorConfigured()
-				? '[einvault] 2FA available (TWOFA_ENC_KEY set)'
-				: '[einvault] 2FA unavailable: set TWOFA_ENC_KEY to enable two-factor authentication'
-		);
-	});
-}
-
 export function logSmtpBootStatus(): void {
 	if (smtpResult.missing.length > 0 && smtpResult.missing.length < SMTP_REQUIRED_VARS.length) {
 		console.warn(
@@ -453,6 +443,10 @@ export function logNtfyBootStatus(): void {
 // Read-only public demo mode. When true, the DB self-provisions a sample
 // dataset, the login page becomes a role picker, all writes are blocked, and
 // OIDC + password login are disabled.
+// Single-admin mode: credentials from environment
+export const ADMIN_USERNAME = env.ADMIN_USERNAME?.trim() ?? 'admin';
+export const ADMIN_PASSWORD_HASH = env.ADMIN_PASSWORD_HASH?.trim() ?? '';
+
 export const DEMO_MODE = envBool(env.DEMO_MODE, false);
 
 export function logDemoBootStatus(): void {

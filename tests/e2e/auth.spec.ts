@@ -18,11 +18,6 @@ test.describe('login @mobile', () => {
 		await expect(page).toHaveURL(/auth\/login/);
 	});
 
-	test('caretaker is redirected to /care', async ({ asCaretaker }) => {
-		await asCaretaker.goto('/');
-		await expect(asCaretaker).toHaveURL(/\/care/);
-	});
-
 	test('unauthenticated visit to app routes bounces to login', async ({ app, browser }) => {
 		const ctx = await browser.newContext({ baseURL: app.server.baseURL });
 		const page = await ctx.newPage();

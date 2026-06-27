@@ -130,14 +130,3 @@ test('journal photo from Immich', async ({ world, page }) => {
 	const photoImgAfterReload = page.locator('img[src*="/api/photos/journal/"]');
 	await expect(photoImgAfterReload).toBeVisible({ timeout: 10_000 });
 });
-
-test('caretaker is blocked from the Immich assets API', async ({ world, browser }) => {
-	const ctx = await browser.newContext({ baseURL: world.server.baseURL });
-	const page = await ctx.newPage();
-	await login(page, world.server.baseURL, SEED.caretaker.username);
-
-	const res = await page.request.get(world.server.baseURL + '/api/immich/assets');
-	expect(res.status()).toBe(403);
-
-	await ctx.close();
-});

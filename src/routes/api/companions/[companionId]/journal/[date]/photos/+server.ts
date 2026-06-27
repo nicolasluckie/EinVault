@@ -25,23 +25,12 @@ function journalKey(companionId: string, date: string, filename: string): string
 // Lightweight status poll for the journal UI. Returns just the transcode-relevant
 // fields so the client can update a 'processing' video to its transcoded MP4
 // (filename/mimeType change, poster appears) without reloading the page and
-// clobbering an in-progress journal edit. Scoped like the other handlers:
-// caretakers may only read their assigned companions.
+// clobbering an in-progress journal edit.
 export const GET: RequestHandler = async ({ params, locals }) => {
 	if (!locals.user) error(401, t(locals.locale, 'error.unauthorized'));
 
 	const { companionId, date } = params;
 	if (!isValidDate(date)) error(400, t(locals.locale, 'error.invalidDate'));
-
-	if (locals.user.role === 'caretaker') {
-		const assignment = await db.query.companionCaretakers.findFirst({
-			where: and(
-				eq(schema.companionCaretakers.companionId, companionId),
-				eq(schema.companionCaretakers.userId, locals.user.id)
-			)
-		});
-		if (!assignment) error(403, t(locals.locale, 'error.forbidden'));
-	}
 
 	const entry = await db.query.journalEntries.findFirst({
 		where: and(
@@ -71,9 +60,6 @@ export const POST: RequestHandler = async ({ request, params, locals }) => {
 
 	const { companionId, date } = params;
 	if (!isValidDate(date)) error(400, t(locals.locale, 'error.invalidDate'));
-
-	// Caretakers may only upload for assigned companions (mirrors the GET guard).
-	await assertCanEditCompanion(locals, companionId);
 
 	// Verify companion exists
 	const companion = await db.query.companions.findFirst({

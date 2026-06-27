@@ -10,6 +10,7 @@
 		HeartPulse,
 		Bell,
 		FileText,
+		Calendar,
 		Search,
 		ChevronDown,
 		LayoutGrid,
@@ -84,6 +85,11 @@
 						href: `/${activeCompanion.id}/reminders`,
 						label: t(locale, 'nav.reminders'),
 						icon: Bell
+					},
+					{
+						href: `/${activeCompanion.id}/log`,
+						label: t(locale, 'nav.log'),
+						icon: Calendar
 					},
 					{
 						href: `/${activeCompanion.id}/documents`,

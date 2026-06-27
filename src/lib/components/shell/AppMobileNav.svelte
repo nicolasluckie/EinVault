@@ -8,6 +8,7 @@
 		NotebookPen,
 		HeartPulse,
 		Bell,
+		Calendar,
 		Search,
 		LayoutGrid,
 		UserRound,
@@ -84,9 +85,9 @@
 						icon: HeartPulse
 					},
 					{
-						href: `/${activeCompanion.id}/reminders`,
-						label: t(locale, 'nav.reminders'),
-						icon: Bell
+						href: `/${activeCompanion.id}/log`,
+						label: t(locale, 'nav.log'),
+						icon: Calendar
 					}
 				]
 			: []
