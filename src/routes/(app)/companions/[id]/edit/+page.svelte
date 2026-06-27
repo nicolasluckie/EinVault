@@ -20,10 +20,12 @@
 	let { companion } = $derived(data);
 	let loading = $state(false);
 	let archiving = $state(false);
+	let deleting = $state(false);
 	let activeTab = $state<'profile' | 'caretaker'>('profile');
 	const locale = getLocale();
 
 	let showArchivePanel = $state(false);
+	let showDeletePanel = $state(false);
 	let savedAlertEl = $state<HTMLElement | null>(null);
 
 	$effect(() => {
@@ -490,6 +492,61 @@
 									: t(locale, 'page.companion.edit.archive')}
 							</Button>
 							<Button type="button" variant="ghost" onclick={() => (showArchivePanel = false)}>
+								{t(locale, 'common.cancel')}
+							</Button>
+						</div>
+					</form>
+				</div>
+			{/if}
+		</div>
+
+		<!-- Delete companion: admin only — permanent deletion -->
+		<div class="rounded-xl border border-coral/40 p-4 space-y-3">
+			<p class="text-[11px] font-semibold uppercase tracking-wider text-coral">
+				{t(locale, 'page.companion.edit.cardDelete')}
+			</p>
+			<p class="text-sm text-muted-foreground">
+				{t(locale, 'page.companion.edit.deleteDescription', { name: companion.name })}
+			</p>
+			<Button
+				variant="softDestructive"
+				onclick={() => (showDeletePanel = true)}
+				disabled={showDeletePanel}
+			>
+				{t(locale, 'page.companion.edit.deleteButton', { name: companion.name })}
+			</Button>
+
+			{#if showDeletePanel}
+				<div class="mt-2 space-y-4 border-t border-coral/20 pt-4 animate-slide-up">
+					<form
+						method="POST"
+						action="?/delete"
+						use:enhance={() => {
+							deleting = true;
+							return async ({ update }) => {
+								deleting = false;
+								await update({ reset: false });
+							};
+						}}
+						class="space-y-4"
+					>
+						<div class="space-y-1.5">
+							<Label for="deleteConfirm">{t(locale, 'page.companion.edit.labelDeleteConfirm')}</Label>
+							<Input
+								id="deleteConfirm"
+								name="deleteConfirm"
+								type="text"
+								autocomplete="off"
+								placeholder={t(locale, 'page.companion.edit.placeholderDeleteConfirm', { name: companion.name })}
+							/>
+						</div>
+						<div class="flex gap-2">
+							<Button type="submit" variant="secondary" disabled={deleting}>
+								{deleting
+									? t(locale, 'page.companion.edit.deleting')
+									: t(locale, 'page.companion.edit.delete')}
+							</Button>
+							<Button type="button" variant="ghost" onclick={() => (showDeletePanel = false)}>
 								{t(locale, 'common.cancel')}
 							</Button>
 						</div>

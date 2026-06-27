@@ -79,5 +79,27 @@ export const actions: Actions = {
 			.where(eq(schema.companions.id, params.id));
 
 		redirect(302, '/admin/companions');
+	},
+
+	delete: async ({ request, params, locals }) => {
+		if (locals.user?.role !== 'admin') error(403, t(locals.locale, 'error.forbidden'));
+
+		const data = await request.formData();
+		const deleteConfirm = String(data.get('deleteConfirm') ?? '').trim();
+
+		const companion = await db.query.companions.findFirst({
+			where: eq(schema.companions.id, params.id)
+		});
+		if (!companion) error(404, t(locals.locale, 'error.companionNotFound'));
+
+		// Require user to type the companion name to confirm deletion
+		if (deleteConfirm.toLowerCase() !== companion.name.toLowerCase()) {
+			return fail(400, { error: t(locals.locale, 'error.deleteConfirmMismatch') });
+		}
+
+		// Delete the companion and all related data
+		await db.delete(schema.companions).where(eq(schema.companions.id, params.id));
+
+		redirect(302, '/admin/companions');
 	}
 };
