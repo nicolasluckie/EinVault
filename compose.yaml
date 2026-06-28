@@ -1,7 +1,6 @@
 services:
   einvault:
     build: .
-    image: einvault:local
     container_name: einvault
     restart: unless-stopped
 
