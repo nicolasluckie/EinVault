@@ -286,6 +286,18 @@ CI runs lint, type checks, unit tests, and the e2e suite (sharded four ways) on 
 
 ---
 
+## Backup Strategy
+
+```bash
+# Backup database
+cp data/einvault.db data/einvault.db.backup.$(date +%Y%m%d)
+
+# Backup uploads (if using local storage)
+tar -czf uploads-backup-$(date +%Y%m%d).tar.gz data/uploads/
+```
+
+---
+
 ## License
 
 [MIT](./LICENSE)
