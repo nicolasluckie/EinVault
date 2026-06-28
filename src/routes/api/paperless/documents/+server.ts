@@ -10,7 +10,6 @@ const MAX_QUERY_LENGTH = 200;
 
 export const GET: RequestHandler = async ({ url, locals }) => {
 	if (!locals.user) error(401, t(locals.locale, 'error.unauthorized'));
-	if (locals.user.role === 'caretaker') error(403, t(locals.locale, 'error.forbidden'));
 
 	const client = getPaperlessClient();
 	if (!client || !PAPERLESS_CONFIG) error(404, t(locals.locale, 'error.notFound'));

@@ -20,10 +20,20 @@
 	let { companion } = $derived(data);
 	let loading = $state(false);
 	let archiving = $state(false);
-	let activeTab = $state<'profile' | 'caretaker'>('profile');
+	let deleting = $state(false);
+	let activeTab = $state<'profile' | 'caretaker' | 'sharing'>('profile');
+	let publicEnabledState = $state(false);
+	$effect(() => {
+		publicEnabledState = companion.publicEnabled ?? false;
+	});
+	let currentOrigin = $state('');
+	$effect(() => {
+		currentOrigin = window.location.origin;
+	});
 	const locale = getLocale();
 
 	let showArchivePanel = $state(false);
+	let showDeletePanel = $state(false);
 	let savedAlertEl = $state<HTMLElement | null>(null);
 
 	$effect(() => {
@@ -135,6 +145,19 @@
 			].join(' ')}
 		>
 			{t(locale, 'page.companion.edit.tabCaretaker')}
+		</button>
+		<button
+			type="button"
+			aria-pressed={activeTab === 'sharing'}
+			onclick={() => (activeTab = 'sharing')}
+			class={[
+				'flex-1 rounded-md px-4 py-1.5 text-sm font-medium transition-all',
+				activeTab === 'sharing'
+					? 'bg-background text-foreground shadow-sm'
+					: 'text-muted-foreground hover:text-foreground'
+			].join(' ')}
+		>
+			{t(locale, 'page.companion.edit.tabSharing')}
 		</button>
 	</div>
 
@@ -382,6 +405,35 @@
 						/>
 					</div>
 				</div>
+
+				<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+					<div class="space-y-1.5">
+						<Label for="emergencyContact2Name"
+							>{t(locale, 'page.companion.edit.labelEmergencyContact2')}</Label
+						>
+						<Input
+							id="emergencyContact2Name"
+							name="emergencyContact2Name"
+							type="text"
+							autocomplete="off"
+							value={companion.emergencyContact2Name ?? ''}
+							placeholder={t(locale, 'page.companion.edit.placeholderEmergencyContact2')}
+						/>
+					</div>
+					<div class="space-y-1.5">
+						<Label for="emergencyContact2Phone"
+							>{t(locale, 'page.companion.edit.labelEmergencyPhone2')}</Label
+						>
+						<Input
+							id="emergencyContact2Phone"
+							name="emergencyContact2Phone"
+							type="tel"
+							autocomplete="off"
+							value={companion.emergencyContact2Phone ?? ''}
+							placeholder={t(locale, 'common.placeholderPhone')}
+						/>
+					</div>
+				</div>
 			</section>
 
 			<Separator />
@@ -401,6 +453,50 @@
 						rows={5}
 					/>
 				</div>
+			</section>
+		</div>
+
+		<!-- Sharing tab: always in DOM, hidden when not active -->
+		<div class:hidden={activeTab !== 'sharing'} class="space-y-6 animate-fade-in">
+			<section class="space-y-4">
+				<p class="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+					{t(locale, 'page.companion.edit.sectionPublicProfile')}
+				</p>
+				<div class="flex items-start gap-3">
+					<input
+						id="publicEnabled"
+						name="publicEnabled"
+						type="checkbox"
+						bind:checked={publicEnabledState}
+						class="mt-0.5 h-4 w-4 rounded border-border accent-primary"
+					/>
+					<div class="space-y-0.5">
+						<Label for="publicEnabled">{t(locale, 'page.companion.edit.enablePublicLabel')}</Label>
+						<p class="text-xs text-muted-foreground">
+							{t(locale, 'page.companion.edit.enablePublicHint')}
+						</p>
+					</div>
+				</div>
+				{#if publicEnabledState}
+					<div class="space-y-1.5">
+						<Label for="publicSlug">{t(locale, 'page.companion.edit.publicSlugLabel')}</Label>
+						<Input
+							id="publicSlug"
+							name="publicSlug"
+							type="text"
+							autocomplete="off"
+							value={companion.publicSlug ?? ''}
+							placeholder={companion.name}
+						/>
+						<p class="text-xs text-muted-foreground">
+							{t(locale, 'page.companion.edit.publicSlugHint')}
+						</p>
+					</div>
+					<div class="rounded-lg bg-muted/60 px-3 py-2 text-xs text-muted-foreground break-all">
+						<span class="font-medium text-foreground">{t(locale, 'page.companion.edit.publicUrlPreview')}:</span>
+						{currentOrigin}/p/{companion.publicSlug ?? companion.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')}
+					</div>
+				{/if}
 			</section>
 		</div>
 
@@ -490,6 +586,61 @@
 									: t(locale, 'page.companion.edit.archive')}
 							</Button>
 							<Button type="button" variant="ghost" onclick={() => (showArchivePanel = false)}>
+								{t(locale, 'common.cancel')}
+							</Button>
+						</div>
+					</form>
+				</div>
+			{/if}
+		</div>
+
+		<!-- Delete companion: admin only — permanent deletion -->
+		<div class="rounded-xl border border-coral/40 p-4 space-y-3">
+			<p class="text-[11px] font-semibold uppercase tracking-wider text-coral">
+				{t(locale, 'page.companion.edit.cardDelete')}
+			</p>
+			<p class="text-sm text-muted-foreground">
+				{t(locale, 'page.companion.edit.deleteDescription', { name: companion.name })}
+			</p>
+			<Button
+				variant="softDestructive"
+				onclick={() => (showDeletePanel = true)}
+				disabled={showDeletePanel}
+			>
+				{t(locale, 'page.companion.edit.deleteButton', { name: companion.name })}
+			</Button>
+
+			{#if showDeletePanel}
+				<div class="mt-2 space-y-4 border-t border-coral/20 pt-4 animate-slide-up">
+					<form
+						method="POST"
+						action="?/delete"
+						use:enhance={() => {
+							deleting = true;
+							return async ({ update }) => {
+								deleting = false;
+								await update({ reset: false });
+							};
+						}}
+						class="space-y-4"
+					>
+						<div class="space-y-1.5">
+							<Label for="deleteConfirm">{t(locale, 'page.companion.edit.labelDeleteConfirm')}</Label>
+							<Input
+								id="deleteConfirm"
+								name="deleteConfirm"
+								type="text"
+								autocomplete="off"
+								placeholder={t(locale, 'page.companion.edit.placeholderDeleteConfirm', { name: companion.name })}
+							/>
+						</div>
+						<div class="flex gap-2">
+							<Button type="submit" variant="secondary" disabled={deleting}>
+								{deleting
+									? t(locale, 'page.companion.edit.deleting')
+									: t(locale, 'page.companion.edit.delete')}
+							</Button>
+							<Button type="button" variant="ghost" onclick={() => (showDeletePanel = false)}>
 								{t(locale, 'common.cancel')}
 							</Button>
 						</div>

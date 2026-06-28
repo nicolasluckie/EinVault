@@ -46,6 +46,7 @@ const messages: Record<keyof Messages, string> = {
 	'enum.activityType.treat': 'Friandise',
 	'enum.activityType.play': 'Jeu',
 	'enum.activityType.grooming': 'Toilettage',
+	'enum.activityType.threw_up': 'Vomi',
 	'enum.activityType.other': 'Autre',
 
 	// Enum: Reminder types
@@ -57,8 +58,6 @@ const messages: Record<keyof Messages, string> = {
 
 	// Enum: User roles
 	'enum.role.admin': 'Administrateur',
-	'enum.role.member': 'Membre',
-	'enum.role.caretaker': 'Gardien',
 
 	// Enum: Sex
 	'enum.sex.male': 'Mâle',
@@ -470,6 +469,9 @@ const messages: Record<keyof Messages, string> = {
 	'page.companion.edit.labelVetClinic': 'Clinique vétérinaire',
 	'page.companion.edit.labelEmergencyContact': "Contact d'urgence",
 	'page.companion.edit.labelEmergencyPhone': 'Téléphone',
+	'page.companion.edit.labelEmergencyContact2': "Contact d'urgence 2",
+	'page.companion.edit.labelEmergencyPhone2': 'Téléphone',
+	'page.companion.edit.placeholderEmergencyContact2': 'Jordan (voisin)',
 	'page.companion.edit.cardSitterNotes': 'Notes pour le gardien',
 	'page.companion.edit.labelNotesForSitter': 'Notes pour le gardien',
 	'page.companion.edit.placeholderFeedingSchedule':
@@ -1021,7 +1023,22 @@ const messages: Record<keyof Messages, string> = {
 	'demo.roleCaretaker': 'Gardien',
 	'demo.sourceLink': 'Source',
 	'demo.writeBlocked':
-		"Cette démo est en lecture seule — votre modification n'a pas été enregistrée."
+		"Cette démo est en lecture seule — votre modification n'a pas été enregistrée.",
+
+	// Page: companion edit — sharing tab
+	'page.companion.edit.tabSharing': 'Partage',
+	'page.companion.edit.sectionPublicProfile': 'Profil public',
+	'page.companion.edit.enablePublicLabel': 'Activer le profil public',
+	'page.companion.edit.enablePublicHint': "N'importe qui avec le lien peut voir ce profil sans se connecter",
+	'page.companion.edit.publicSlugLabel': 'Slug URL public',
+	'page.companion.edit.publicSlugHint': "Laisser vide pour utiliser le nom du compagnon",
+	'page.companion.edit.publicUrlPreview': 'URL publique',
+
+	// Page: public companion profile
+	'page.public.badge': 'Profil public',
+
+	// Errors: public slug
+	'error.slugTaken': "Cette URL est déjà utilisée par un autre compagnon"
 
 	// Meta
 } satisfies Record<keyof Messages, string>;

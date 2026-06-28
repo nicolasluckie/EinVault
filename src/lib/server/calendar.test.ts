@@ -8,7 +8,6 @@ const NOW = new Date('2026-06-15T12:00:00Z');
 async function seed() {
 	await db.delete(schema.reminders);
 	await db.delete(schema.healthEvents);
-	await db.delete(schema.companionCaretakers);
 	await db.delete(schema.companions);
 	await db.delete(schema.users);
 	await db
@@ -96,25 +95,5 @@ describe('getCalendarItems', () => {
 			now: NOW
 		});
 		expect(items).toHaveLength(0);
-	});
-
-	it('companion filter excludes shifts for a caretaker', async () => {
-		await db
-			.insert(schema.users)
-			.values({ id: 'ct1', username: 'ct1', displayName: 'CT', role: 'caretaker' });
-		await db.insert(schema.companionCaretakers).values({ userId: 'ct1', companionId: 'c-active' });
-		// shift end is far in the future so getUpcomingShifts returns it
-		await db.insert(schema.caretakerShifts).values({
-			id: 'shift1',
-			userId: 'ct1',
-			startAt: new Date(Date.now() + 60_000),
-			endAt: new Date(Date.now() + 3_600_000)
-		});
-
-		const items = await getCalendarItems(
-			{ id: 'ct1', role: 'caretaker' },
-			{ types: [], companionIds: ['c-active'], historyDays: 90, now: NOW }
-		);
-		expect(items.every((i) => i.kind !== 'shift')).toBe(true);
 	});
 });

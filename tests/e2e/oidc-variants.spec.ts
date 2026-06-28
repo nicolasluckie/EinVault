@@ -115,37 +115,7 @@ test('oidc-variants: signup denied when OIDC_ALLOW_SIGNUP=false', async ({ page 
 	}
 });
 
-// ─── Test 2: default role = caretaker ─────────────────────────────────────
-
-test('oidc-variants: new user gets caretaker role when OIDC_DEFAULT_ROLE=caretaker', async ({
-	page
-}) => {
-	const world = await bootOidcWorld('default-caretaker', {
-		OIDC_ALLOW_SIGNUP: 'true',
-		OIDC_DEFAULT_ROLE: 'caretaker'
-	});
-	try {
-		world.oidc.setClaims({
-			sub: 'variant-sub-2',
-			email: 'variant2@example.com',
-			preferred_username: 'variantuser2',
-			name: 'Variant User 2'
-		});
-
-		await page.goto(world.server.baseURL + '/auth/login');
-		await page.getByRole('link', { name: /sign in with mockidp/i }).click();
-
-		// Caretakers are redirected to /care after login.
-		await expect(page).toHaveURL(/\/care/, { timeout: 15_000 });
-
-		// The caretaker layout badge confirms the role in the UI.
-		await expect(page.getByText(/caretaker/i).first()).toBeVisible({ timeout: 5_000 });
-	} finally {
-		await teardown(world);
-	}
-});
-
-// ─── Test 3: admin group grants admin role ─────────────────────────────────
+// ─── Test 2: admin group grants admin role ─────────────────────────────────
 
 test('oidc-variants: admin group membership grants admin role', async ({ page }) => {
 	const world = await bootOidcWorld('admin-group-grants', {

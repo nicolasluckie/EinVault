@@ -7,7 +7,7 @@
 
 <footer class="text-center text-xs text-muted-foreground/60 pt-2 pb-24 md:pb-2 space-x-2">
 	<a
-		href="https://github.com/davefatkin/einvault"
+		href="https://github.com/nicolasluckie/einvault"
 		target="_blank"
 		rel="noopener noreferrer"
 		class="hover:text-muted-foreground transition-colors"
@@ -15,5 +15,5 @@
 		{version ? `v${version}` : t(locale, 'component.footer.sourceCode')}
 	</a>
 	<span aria-hidden="true">·</span>
-	<span>&copy; {year} Dave Fatkin</span>
+	<span>&copy; {year} Nicolas Luckie</span>
 </footer>

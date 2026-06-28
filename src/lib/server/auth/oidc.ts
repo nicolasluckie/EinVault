@@ -145,8 +145,8 @@ export function isAdminGroupsConfigured(): boolean {
 //   groups aren't configured and the existing role should be preserved).
 export function evaluateRole(
 	claims: client.IDToken,
-	fallbackRole: string
-): 'admin' | 'member' | 'caretaker' {
+	_fallbackRole: string
+): 'admin' {
 	const adminGroups = env.OIDC_ADMIN_GROUPS;
 	if (adminGroups) {
 		const configured = adminGroups
@@ -164,6 +164,6 @@ export function evaluateRole(
 		}
 	}
 
-	if (fallbackRole === 'caretaker') return 'caretaker';
-	return 'member';
+	// All users are admins now
+	return 'admin';
 }

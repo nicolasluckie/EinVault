@@ -7,7 +7,7 @@
 	type User = {
 		id: string;
 		displayName: string;
-		role: 'admin' | 'member' | 'caretaker';
+		role: 'admin';
 		avatarPath?: string | null;
 	};
 
@@ -100,13 +100,6 @@
 				>
 					{t(locale, 'nav.admin')}
 				</p>
-				<a
-					href="/admin/users"
-					onclick={onclose}
-					class="flex items-center gap-3 px-4 py-2.5 text-sm text-foreground hover:bg-accent transition-colors"
-				>
-					<ShieldCheck class="h-4 w-4 shrink-0 text-muted-foreground" />{t(locale, 'nav.members')}
-				</a>
 				<a
 					href="/admin/companions"
 					onclick={onclose}

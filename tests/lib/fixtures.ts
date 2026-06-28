@@ -16,7 +16,7 @@ export interface AppWorker {
 }
 
 type WorkerFixtures = { app: AppWorker };
-type TestFixtures = { asAdmin: Page; asMember: Page; asCaretaker: Page };
+type TestFixtures = { asAdmin: Page; asMember: Page };
 
 export const test = base.extend<TestFixtures, WorkerFixtures>({
 	app: [
@@ -45,7 +45,7 @@ export const test = base.extend<TestFixtures, WorkerFixtures>({
 			}
 
 			// Cached storageState contract: tests must never invalidate sessions or
-			// change passwords for the cached roles (admin/member/caretaker) — the
+			// change passwords for the cached roles (admin/member) — the
 			// cookie in the state file would go stale for the rest of the worker.
 			// Destructive flows use SEED.resetUser or a dedicated seed identity.
 			const statePromises = new Map<Role, Promise<string>>();
@@ -100,14 +100,6 @@ export const test = base.extend<TestFixtures, WorkerFixtures>({
 		const ctx = await browser.newContext({
 			baseURL: app.server.baseURL,
 			storageState: await app.stateFor('member', browser)
-		});
-		await use(await ctx.newPage());
-		await ctx.close();
-	},
-	asCaretaker: async ({ app, browser }, use) => {
-		const ctx = await browser.newContext({
-			baseURL: app.server.baseURL,
-			storageState: await app.stateFor('caretaker', browser)
 		});
 		await use(await ctx.newPage());
 		await ctx.close();

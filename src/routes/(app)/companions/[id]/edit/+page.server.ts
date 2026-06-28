@@ -2,12 +2,20 @@ import { error, fail, redirect } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
 import { t } from '$lib/i18n';
 import { db, schema } from '$lib/server/db';
-import { eq } from 'drizzle-orm';
+import { eq, and, ne } from 'drizzle-orm';
 import { parseSex, parseWeightUnit } from '$lib/server/validation';
+
+function slugify(input: string): string {
+	return input
+		.toLowerCase()
+		.replace(/\s+/g, '-')
+		.replace(/[^a-z0-9-]/g, '')
+		.replace(/-+/g, '-')
+		.replace(/^-|-$/g, '');
+}
 
 export const load: PageServerLoad = async ({ params, locals }) => {
 	if (!locals.user) redirect(302, '/auth/login');
-	if (locals.user.role === 'caretaker') redirect(302, '/care');
 
 	const companion = await db.query.companions.findFirst({
 		where: eq(schema.companions.id, params.id)
@@ -20,7 +28,6 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 export const actions: Actions = {
 	save: async ({ request, params, locals }) => {
 		if (!locals.user) redirect(302, '/auth/login');
-		if (locals.user.role === 'caretaker') redirect(302, '/care');
 
 		const companion = await db.query.companions.findFirst({
 			where: eq(schema.companions.id, params.id)
@@ -31,6 +38,29 @@ export const actions: Actions = {
 		const name = String(data.get('name') ?? '').trim();
 
 		if (!name) return fail(400, { error: t(locals.locale, 'error.nameRequired') });
+
+		// Public profile sharing — validate before any DB write
+		const publicEnabled = data.get('publicEnabled') === 'on';
+		let publicSlug: string | null = null;
+
+		if (publicEnabled) {
+			const rawSlug = String(data.get('publicSlug') ?? '').trim();
+			publicSlug = rawSlug ? slugify(rawSlug) : slugify(name);
+
+			if (!publicSlug) {
+				return fail(400, { error: t(locals.locale, 'error.nameRequired') });
+			}
+
+			const conflict = await db.query.companions.findFirst({
+				where: and(
+					eq(schema.companions.publicSlug, publicSlug),
+					ne(schema.companions.id, params.id)
+				)
+			});
+			if (conflict) {
+				return fail(400, { error: t(locals.locale, 'error.slugTaken') });
+			}
+		}
 
 		await db
 			.update(schema.companions)
@@ -48,10 +78,15 @@ export const actions: Actions = {
 				medicationSchedule: String(data.get('medicationSchedule') ?? '').trim() || null,
 				emergencyContactName: String(data.get('emergencyContactName') ?? '').trim() || null,
 				emergencyContactPhone: String(data.get('emergencyContactPhone') ?? '').trim() || null,
+				emergencyContact2Name: String(data.get('emergencyContact2Name') ?? '').trim() || null,
+				emergencyContact2Phone: String(data.get('emergencyContact2Phone') ?? '').trim() || null,
 				vetName: String(data.get('vetName') ?? '').trim() || null,
 				vetPhone: String(data.get('vetPhone') ?? '').trim() || null,
 				vetClinic: String(data.get('vetClinic') ?? '').trim() || null,
-				notesForSitter: String(data.get('notesForSitter') ?? '').trim() || null
+				notesForSitter: String(data.get('notesForSitter') ?? '').trim() || null,
+				// Public profile sharing
+				publicEnabled,
+				publicSlug
 			})
 			.where(eq(schema.companions.id, params.id));
 
@@ -77,6 +112,28 @@ export const actions: Actions = {
 				archiveNote: archiveNote || null
 			})
 			.where(eq(schema.companions.id, params.id));
+
+		redirect(302, '/admin/companions');
+	},
+
+	delete: async ({ request, params, locals }) => {
+		if (locals.user?.role !== 'admin') error(403, t(locals.locale, 'error.forbidden'));
+
+		const data = await request.formData();
+		const deleteConfirm = String(data.get('deleteConfirm') ?? '').trim();
+
+		const companion = await db.query.companions.findFirst({
+			where: eq(schema.companions.id, params.id)
+		});
+		if (!companion) error(404, t(locals.locale, 'error.companionNotFound'));
+
+		// Require user to type the companion name to confirm deletion
+		if (deleteConfirm.toLowerCase() !== companion.name.toLowerCase()) {
+			return fail(400, { error: t(locals.locale, 'error.deleteConfirmMismatch') });
+		}
+
+		// Delete the companion and all related data
+		await db.delete(schema.companions).where(eq(schema.companions.id, params.id));
 
 		redirect(302, '/admin/companions');
 	}

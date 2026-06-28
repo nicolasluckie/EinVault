@@ -42,6 +42,27 @@ test.describe('companion crud', () => {
 		await expect(asMember.locator('#breed')).toHaveValue('e2e-breed');
 	});
 
+	test('edit persists second emergency contact', async ({ asMember }) => {
+		const id = await createCompanion(asMember, 'e2e-comp-emergency2');
+
+		await asMember.goto(`/companions/${id}/edit`);
+		// Switch to Caretaker tab
+		await asMember.getByRole('button', { name: 'Caretaker info' }).click();
+		// Fill in second emergency contact
+		await asMember.locator('#emergencyContact2Name').fill('Jordan');
+		await asMember.locator('#emergencyContact2Phone').fill('555-0199');
+		await asMember.getByRole('button', { name: 'Save Changes' }).click();
+
+		// After save the page stays on the edit page and shows a success toast
+		await expect(asMember.getByText('Changes saved.')).toBeVisible({ timeout: 8_000 });
+
+		// Reload and confirm the values are persisted
+		await asMember.goto(`/companions/${id}/edit`);
+		await asMember.getByRole('button', { name: 'Caretaker info' }).click();
+		await expect(asMember.locator('#emergencyContact2Name')).toHaveValue('Jordan');
+		await expect(asMember.locator('#emergencyContact2Phone')).toHaveValue('555-0199');
+	});
+
 	test('empty name is rejected', async ({ asMember }) => {
 		await asMember.goto('/companions/new');
 

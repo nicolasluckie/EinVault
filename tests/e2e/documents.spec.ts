@@ -116,9 +116,4 @@ test.describe('documents', () => {
 		await asMember.getByRole('button', { name: 'All categories', exact: true }).click();
 		await expect(asMember.getByText('e2e-doc-chip.pdf')).toBeVisible({ timeout: 8_000 });
 	});
-
-	test('caretaker blocked', async ({ asCaretaker }) => {
-		const response = await asCaretaker.request.get(`/api/companions/${COMP}/documents`);
-		expect(response.status()).toBe(403);
-	});
 });

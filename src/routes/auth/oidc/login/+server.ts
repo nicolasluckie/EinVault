@@ -11,7 +11,7 @@ export const GET: RequestHandler = async ({ url, cookies, locals, request }) => 
 	if (!isOidcEnabled()) error(404);
 
 	if (locals.user) {
-		redirect(302, locals.user.role === 'caretaker' ? '/care' : '/');
+		redirect(302, '/');
 	}
 
 	const rawReturnTo = url.searchParams.get('returnTo') ?? '/';

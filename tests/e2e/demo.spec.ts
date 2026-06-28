@@ -148,7 +148,6 @@ test('login page shows role picker not credential form', async ({ world, page })
 		timeout: 10_000
 	});
 	await expect(page.getByRole('button', { name: /Explore as Member/i })).toBeVisible();
-	await expect(page.getByRole('button', { name: /Explore as Caretaker/i })).toBeVisible();
 
 	// Password input must not exist (exact match avoids "Confirm password" collision)
 	await expect(page.getByLabel('Password', { exact: true })).toHaveCount(0);
@@ -172,12 +171,6 @@ test('demo hides the app version in the footer', async ({ world, page }) => {
 	// No vX.Y.Z version string; footer falls back to the source-code link.
 	await expect(footer).not.toContainText(/v\d+\.\d+\.\d+/);
 	await expect(footer.getByText('Source Code', { exact: true })).toBeVisible();
-});
-
-test('caretaker role lands on /care', async ({ world, page }) => {
-	await page.goto(world.server.baseURL + '/auth/login');
-	await page.getByRole('button', { name: /Explore as Caretaker/i }).click();
-	await expect(page).toHaveURL(/\/care/, { timeout: 10_000 });
 });
 
 // ─── 3. Demo bar visible and role switch works ────────────────────────────────
@@ -256,21 +249,7 @@ test('demo bar pins to the top and does not overlap top chrome @mobile', async (
 	}
 });
 
-// ─── 5. Caretaker sees on-shift assigned companion ────────────────────────────
-
-test('caretaker sees assigned companion on shift', async ({ world, page }) => {
-	await page.goto(world.server.baseURL + '/auth/login');
-	await page.getByRole('button', { name: /Explore as Caretaker/i }).click();
-	await expect(page).toHaveURL(/\/care/, { timeout: 10_000 });
-
-	// The seeded caretaker (Faye) is assigned to Ein with an active shift.
-	// Use role=heading to avoid matching 'EinVault' in the nav.
-	await expect(
-		page.getByRole('heading', { name: SEED.companions.ein.name, exact: true })
-	).toBeVisible({ timeout: 10_000 });
-});
-
-// ─── 6. Direct API write returns 403 with { demo: true } ─────────────────────
+// ─── 5. Direct API write returns 403 with { demo: true } ─────────────────────
 
 test('direct API write returns 403 json with demo flag', async ({ world, page }) => {
 	await page.goto(world.server.baseURL + '/auth/login');

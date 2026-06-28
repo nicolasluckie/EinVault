@@ -10,7 +10,9 @@
 <div align="center">
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-1.0.5-7348f4.svg)](https://github.com/davefatkin/EinVault/releases)
+[![Version](https://img.shields.io/badge/version-1.0.5-7348f4.svg)](https://github.com/nicolasluckie/EinVault/releases)
+[![CI](https://github.com/nicolasluckie/EinVault/actions/workflows/ci.yml/badge.svg)](https://github.com/nicolasluckie/EinVault/actions/workflows/ci.yml)
+[![Tests](https://raw.githubusercontent.com/nicolasluckie/EinVault/main/tests/badge.svg)](https://github.com/nicolasluckie/EinVault/actions/workflows/ci.yml)
 
 </div>
 
@@ -23,10 +25,9 @@
 - **Health tracking** — vet visits, vaccinations, medications, procedures, and weight history
 - **Activity logging** — walks, meals, bathroom trips, treats, play sessions, and grooming
 - **Reminders** — recurring and one-time reminders for medications, vaccinations, grooming, and more
-- **Search** — full-text search across journals, health, activity, reminders, documents, and media, with `@companion`, `#type`, and date-range filters (members and admins)
-- **Calendar feed** — subscribe to health events, reminders (with recurrence), and shifts from any calendar app or Home Assistant via a personal, revocable ICS URL
-- **Caretaker shifts** — schedule work shifts and export to calendar via iCalendar (.ics)
-- **Role-based access** — admins manage the app, members track health, caretakers log activities
+- **Search** — full-text search across journals, health, activity, reminders, documents, and media, with `@companion`, `#type`, and date-range filters
+- **Calendar feed** — subscribe to health events and reminders (with recurrence) from any calendar app or Home Assistant via a personal, revocable ICS URL
+- **Single-admin access** — one admin user manages the app and tracks all companion data
 - **Self-contained** — single Docker container, SQLite database, no external dependencies
 - **Localization** — English, German, Spanish, French, Italian, and Portuguese (non-English translations are AI-generated and may contain errors)
 - **Responsive UI** — works on desktop and mobile, with dark and light mode support
@@ -39,8 +40,11 @@
 |-------|-----------|
 | Frontend | SvelteKit, Svelte, TypeScript, Tailwind CSS |
 | Backend | Node.js, SvelteKit server |
-| Database | SQLite |
+| Database | SQLite, Drizzle ORM |
 | Deployment | Docker |
+| Testing | Vitest, Playwright |
+| Linting | ESLint, Prettier |
+| Changelog | git-cliff |
 
 ---
 
@@ -48,15 +52,15 @@
 
 ### Prerequisites
 
-- [Node.js](https://nodejs.org) >= 20
-- npm >= 10
+- [Node.js](https://nodejs.org) >= 26.6.4
+- npm >= 11.17.0
 - Docker (optional, for containerized deployment)
 
 ### Installation
 
 1. Clone the repo:
    ```bash
-   git clone https://github.com/nicolasluckie/EinVault.git
+   git clone https://github.com/yourorg/EinVault.git
    cd EinVault
    ```
 
@@ -65,18 +69,26 @@
    npm install
    ```
 
-3. Generate and apply database migrations:
+3. Configure environment variables:
+   1. Copy the example environment file:
    ```bash
+   cp .env.example .env
+   ```
+   2. Edit `.env` and set `ADMIN_USERNAME` and `ADMIN_PASSWORD`
+
+4. Create data directory and apply database migrations:
+   ```bash
+   mkdir -p data
    npm run db:generate
    npm run db:migrate
    ```
 
-4. Start the development server:
+5. Start the development server:
    ```bash
    npm run dev
    ```
 
-The app will be available at `http://localhost:5173`. Open it and follow the `/setup` prompt to create your admin account.
+The app will be available at `http://localhost:5173`.
 
 ---
 
@@ -103,13 +115,21 @@ The app will be available at `http://localhost:5173`. Open it and follow the `/s
 ```
 EinVault/
 ├── src/
-│   ├── components/        # UI components
-│   ├── lib/              # Utilities, i18n, database schema
+│   ├── components/        # Reusable UI components
+│   ├── lib/              # Utilities, i18n, database schema, server helpers
 │   ├── routes/           # SvelteKit file-based routing
 │   └── app.html         # HTML template
 ├── static/               # Static assets
+├── tests/
+│   ├── e2e/              # Playwright end-to-end tests
+│   ├── fakes/            # Fake implementations for external services
+│   └── lib/              # Test utilities and fixtures
+├── drizzle/              # Database migrations
 ├── docker-compose.prod.yml   # Production Docker Compose config
 ├── docker-compose.dev.yml    # Development Docker Compose config
+├── cliff.toml               # git-cliff changelog configuration
+├── AGENTS.md                # AI agent commit message rules
+├── CHANGELOG.md             # Auto-generated changelog
 └── README.md
 ```
 
@@ -163,7 +183,8 @@ All the same env vars work here. `ORIGIN` defaults to `http://localhost:3000` so
 | `CALENDAR_FEED_ENABLED` | Set `false` to disable the calendar feed endpoint | `true` |
 | `DEMO_MODE` | Enable read-only public demo mode | `false` |
 | `DATABASE_URL` | Database path inside the container | `/data/einvault.db` |
-| `TWOFA_ENC_KEY` | 32-byte base64 key for encrypting TOTP secrets | — |
+| `ADMIN_USERNAME` | Admin username for login | — |
+| `ADMIN_PASSWORD` | Admin password (plaintext, hashed automatically at startup) | — |
 
 ### Optional Integrations
 
@@ -258,25 +279,22 @@ CI runs lint, type checks, unit tests, and the e2e suite (sharded four ways) on 
 
 ## User Management
 
-- First run redirects to `/setup` to create the initial admin account (one-time only)
+- Admin user is bootstrapped from environment variables on first run
+- Set `ADMIN_USERNAME` and `ADMIN_PASSWORD` to provision the admin
 - Manage users at `/admin/users`: create accounts, reset passwords, deactivate users
 - No open registration
 
 ---
 
-## Two-Factor Authentication (2FA)
-
-EinVault supports per-user TOTP-based two-factor authentication. Users can enable it under Settings → Security: scan the QR code with any TOTP app (Aegis, Bitwarden Authenticator, Google Authenticator, etc.), enter the confirmation code, and download the 10 one-time backup codes.
-
-**Requirements.** 2FA requires `TWOFA_ENC_KEY` to be set. This is a 32-byte base64 key used to encrypt stored TOTP secrets at rest. Without it, 2FA is unavailable and the enforcement setting in the admin panel is locked.
-
-Generate a key:
+## Backup Strategy
 
 ```bash
-openssl rand -base64 32
-```
+# Backup database
+cp data/einvault.db data/einvault.db.backup.$(date +%Y%m%d)
 
-Add it to your compose file or `.env`.
+# Backup uploads (if using local storage)
+tar -czf uploads-backup-$(date +%Y%m%d).tar.gz data/uploads/
+```
 
 ---
 

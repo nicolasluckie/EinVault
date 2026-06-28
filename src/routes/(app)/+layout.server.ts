@@ -11,9 +11,7 @@ export const load: LayoutServerLoad = async ({ locals }) => {
 	}
 
 	// Caretakers have their own layout: boot them to /care
-	if (locals.user.role === 'caretaker') {
-		redirect(302, '/care');
-	}
+	// Removed: all users are now admins
 
 	const [companions, archivedCompanions] = await Promise.all([
 		db.query.companions.findMany({

@@ -14,18 +14,15 @@
 		activeCompanion: Companion | null;
 		/** Status dots in the dropdown. Pass {} to omit dot coloring (defaults to up-to-date). */
 		companionStatus?: Record<string, CareStatus>;
-		/** Owner switcher offers an "Overview" entry; caretaker does not. */
+		/** Owner switcher offers an "Overview" entry. */
 		includeOverview?: boolean;
-		/** Route prefix for switching: '' for owner (/{id}), '/care' for caretaker (/care/{id}). */
-		basePath?: '' | '/care';
 	}
 
 	let {
 		companions,
 		activeCompanion,
 		companionStatus = {},
-		includeOverview = false,
-		basePath = ''
+		includeOverview = false
 	}: Props = $props();
 
 	const locale = getLocale();
@@ -50,16 +47,16 @@
 	function switchTo(id: string) {
 		open = false;
 		if (id === OVERVIEW_VALUE) {
-			goto(basePath || '/');
+			goto('/');
 			return;
 		}
 		const parts = page.url.pathname.split('/');
-		const idIndex = basePath === '/care' ? 2 : 1;
+		const idIndex = 1;
 		if (activeCompanion && parts[idIndex] === activeCompanion.id) {
 			const section = parts.slice(idIndex + 1).join('/');
-			goto(`${basePath}/${id}${section ? `/${section}` : ''}`);
+			goto(`/${id}${section ? `/${section}` : ''}`);
 		} else {
-			goto(`${basePath}/${id}`);
+			goto(`/${id}`);
 		}
 	}
 
@@ -67,7 +64,7 @@
 		if (e.key === 'Escape') open = false;
 	}
 
-	let isOnOverview = $derived(page.url.pathname === (basePath || '/'));
+	let isOnOverview = $derived(page.url.pathname === '/');
 </script>
 
 {#if companions.length > 1 || isOverview}

@@ -168,16 +168,7 @@
 					<div class="flex flex-wrap items-center gap-x-2 gap-y-1">
 						<span class="font-medium text-foreground">{user.displayName}</span>
 						<Badge variant="secondary" class="font-mono">{user.username}</Badge>
-						<Badge variant={roleBadge[user.role]}
-							>{t(
-								locale,
-								user.role === 'admin'
-									? 'enum.role.admin'
-									: user.role === 'caretaker'
-										? 'enum.role.caretaker'
-										: 'enum.role.member'
-							)}</Badge
-						>
+						<Badge variant={roleBadge[user.role]}>{t(locale, 'enum.role.admin')}</Badge>
 						{#if !user.isActive}
 							<Badge variant="coral">{t(locale, 'page.admin.inactiveBadge')}</Badge>
 						{/if}

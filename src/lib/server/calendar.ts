@@ -1,10 +1,9 @@
 import { eq, inArray } from 'drizzle-orm';
 import { env } from '$env/dynamic/private';
 import { db, schema } from '$lib/server/db';
-import { getUpcomingShifts } from '$lib/server/shifts';
 import { reminderRecurrence, type Recurrence } from '$lib/server/calendarRrule';
 
-export type CalendarKind = 'health' | 'reminder' | 'shift';
+export type CalendarKind = 'health' | 'reminder';
 
 export interface CalendarItem {
 	kind: CalendarKind;
@@ -43,13 +42,6 @@ async function visibleCompanions(user: FeedUser, companionIds: string[]) {
 		where: eq(schema.companions.isActive, true)
 	});
 	let visible = rows;
-	if (user.role === 'caretaker') {
-		const assigned = await db.query.companionCaretakers.findMany({
-			where: eq(schema.companionCaretakers.userId, user.id)
-		});
-		const assignedIds = new Set(assigned.map((a) => a.companionId));
-		visible = visible.filter((c) => assignedIds.has(c.id));
-	}
 	if (companionIds.length > 0) {
 		const want = new Set(companionIds);
 		visible = visible.filter((c) => want.has(c.id));
@@ -134,22 +126,6 @@ export async function getCalendarItems(
 					allDay: false
 				});
 			}
-		}
-	}
-
-	if (user.role === 'caretaker' && wants(filters, 'shift') && filters.companionIds.length === 0) {
-		const shifts = await getUpcomingShifts(user.id);
-		for (const s of shifts) {
-			items.push({
-				kind: 'shift',
-				uid: `shift-${s.id}@einvault`,
-				companionId: null,
-				companionName: null,
-				title: '',
-				start: s.startAt,
-				end: s.endAt,
-				allDay: false
-			});
 		}
 	}
 

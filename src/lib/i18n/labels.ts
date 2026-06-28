@@ -18,6 +18,7 @@ export const ACTIVITY_ICONS: Record<string, string> = {
 	treat: '🦴',
 	play: '🎾',
 	grooming: '🛁',
+	threw_up: '🤮',
 	other: '📝'
 };
 
@@ -36,6 +37,7 @@ export const ACTIVITY_HAS_DURATION: Record<string, boolean> = {
 	treat: false,
 	play: true,
 	grooming: true,
+	threw_up: false,
 	other: false
 };
 
@@ -83,7 +85,7 @@ export function healthTypeOptions(locale: Locale) {
 }
 
 export function activityTypeOptions(locale: Locale) {
-	return (['walk', 'meal', 'bathroom', 'treat', 'play', 'grooming', 'other'] as const).map((v) => ({
+	return (['walk', 'meal', 'bathroom', 'treat', 'play', 'grooming', 'threw_up', 'other'] as const).map((v) => ({
 		value: v,
 		icon: ACTIVITY_ICONS[v],
 		label: activityLabel(locale, v),
@@ -107,7 +109,7 @@ export function sexOptions(locale: Locale) {
 }
 
 export function roleOptions(locale: Locale) {
-	return (['admin', 'member', 'caretaker'] as const).map((v) => ({
+	return (['admin'] as const).map((v) => ({
 		value: v,
 		label: roleLabel(locale, v)
 	}));

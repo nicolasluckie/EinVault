@@ -19,9 +19,9 @@ export const users = sqliteTable(
 		displayName: text('display_name').notNull(),
 		passwordHash: text('password_hash'),
 		calendarFeedToken: text('calendar_feed_token'),
-		role: text('role', { enum: ['admin', 'member', 'caretaker'] })
+		role: text('role', { enum: ['admin'] })
 			.notNull()
-			.default('member'),
+			.default('admin'),
 		isActive: integer('is_active', { mode: 'boolean' }).notNull().default(true),
 		createdAt: integer('created_at', { mode: 'timestamp' })
 			.notNull()
@@ -65,18 +65,6 @@ export const users = sqliteTable(
 		uniqueIndex('users_calendar_feed_token_idx').on(t.calendarFeedToken)
 	]
 );
-
-export const totpBackupCodes = sqliteTable('totp_backup_codes', {
-	id: text('id').primaryKey(),
-	userId: text('user_id')
-		.notNull()
-		.references(() => users.id, { onDelete: 'cascade' }),
-	codeHash: text('code_hash').notNull(),
-	usedAt: integer('used_at', { mode: 'timestamp' }),
-	createdAt: integer('created_at', { mode: 'timestamp' })
-		.notNull()
-		.default(sql`(unixepoch())`)
-});
 
 export const appSettings = sqliteTable('app_settings', {
 	id: text('id').primaryKey().default('singleton'),
@@ -187,10 +175,14 @@ export const companions = sqliteTable(
 		medicationSchedule: text('medication_schedule'),
 		emergencyContactName: text('emergency_contact_name'),
 		emergencyContactPhone: text('emergency_contact_phone'),
+		emergencyContact2Name: text('emergency_contact_2_name'),
+		emergencyContact2Phone: text('emergency_contact_2_phone'),
 		vetName: text('vet_name'),
 		vetPhone: text('vet_phone'),
 		vetClinic: text('vet_clinic'),
 		notesForSitter: text('notes_for_sitter'),
+		publicSlug: text('public_slug'),
+		publicEnabled: integer('public_enabled', { mode: 'boolean' }).notNull().default(false),
 		isActive: integer('is_active', { mode: 'boolean' }).notNull().default(true),
 		archivedAt: integer('archived_at', { mode: 'timestamp' }),
 		archiveNote: text('archive_note'),
@@ -198,7 +190,10 @@ export const companions = sqliteTable(
 			.notNull()
 			.default(sql`(unixepoch())`)
 	},
-	(t) => [index('companion_active_idx').on(t.isActive)]
+	(t) => [
+		index('companion_active_idx').on(t.isActive),
+		uniqueIndex('companion_public_slug_idx').on(t.publicSlug)
+	]
 );
 
 // journal
@@ -378,7 +373,7 @@ export const dailyEvents = sqliteTable(
 			.notNull()
 			.references(() => companions.id, { onDelete: 'cascade' }),
 		type: text('type', {
-			enum: ['walk', 'meal', 'bathroom', 'treat', 'play', 'grooming', 'other']
+			enum: ['walk', 'meal', 'bathroom', 'treat', 'play', 'grooming', 'threw_up', 'other']
 		}).notNull(),
 		notes: text('notes'),
 		durationMinutes: integer('duration_minutes'),
@@ -433,48 +428,9 @@ export const reminders = sqliteTable(
 	})
 );
 
-// companion <-> caretaker assignments
-
-export const companionCaretakers = sqliteTable(
-	'companion_caretakers',
-	{
-		companionId: text('companion_id')
-			.notNull()
-			.references(() => companions.id, { onDelete: 'cascade' }),
-		userId: text('user_id')
-			.notNull()
-			.references(() => users.id, { onDelete: 'cascade' })
-	},
-	(t) => ({
-		pk: primaryKey({ columns: [t.companionId, t.userId] })
-	})
-);
-
-// caretaker shifts
-
-export const caretakerShifts = sqliteTable(
-	'caretaker_shifts',
-	{
-		id: text('id').primaryKey(),
-		userId: text('user_id')
-			.notNull()
-			.references(() => users.id, { onDelete: 'cascade' }),
-		startAt: integer('start_at', { mode: 'timestamp' }).notNull(),
-		endAt: integer('end_at', { mode: 'timestamp' }).notNull(),
-		notes: text('notes'),
-		createdAt: integer('created_at', { mode: 'timestamp' })
-			.notNull()
-			.default(sql`(unixepoch())`)
-	},
-	(t) => ({
-		userIdx: index('shift_user_idx').on(t.userId)
-	})
-);
-
 // type exports
 
 export type User = typeof users.$inferSelect;
-export type TotpBackupCode = typeof totpBackupCodes.$inferSelect;
 export type AppSettings = typeof appSettings.$inferSelect;
 export type Session = typeof sessions.$inferSelect;
 export type PasswordResetToken = typeof passwordResetTokens.$inferSelect;
@@ -487,8 +443,6 @@ export type Document = typeof documents.$inferSelect;
 export type WeightEntry = typeof weightEntries.$inferSelect;
 export type DailyEvent = typeof dailyEvents.$inferSelect;
 export type Reminder = typeof reminders.$inferSelect;
-export type CompanionCaretaker = typeof companionCaretakers.$inferSelect;
-export type CaretakerShift = typeof caretakerShifts.$inferSelect;
 
 // relations
 
@@ -508,9 +462,6 @@ export const usersRelations = relations(users, ({ many }) => ({
 	sessions: many(sessions),
 	passwordResetTokens: many(passwordResetTokens),
 	notificationOutbox: many(notificationOutbox),
-	totpBackupCodes: many(totpBackupCodes),
-	companionCaretakers: many(companionCaretakers),
-	shifts: many(caretakerShifts),
 	loggedJournalEntries: many(journalEntries, { relationName: 'journalLogger' }),
 	updatedJournalEntries: many(journalEntries, { relationName: 'journalUpdater' }),
 	loggedJournalPhotos: many(journalPhotos),
@@ -519,22 +470,6 @@ export const usersRelations = relations(users, ({ many }) => ({
 	loggedWeightEntries: many(weightEntries),
 	loggedReminders: many(reminders, { relationName: 'reminderLogger' }),
 	completedReminders: many(reminders, { relationName: 'reminderCompleter' })
-}));
-
-export const totpBackupCodesRelations = relations(totpBackupCodes, ({ one }) => ({
-	user: one(users, { fields: [totpBackupCodes.userId], references: [users.id] })
-}));
-
-export const companionCaretakersRelations = relations(companionCaretakers, ({ one }) => ({
-	companion: one(companions, {
-		fields: [companionCaretakers.companionId],
-		references: [companions.id]
-	}),
-	user: one(users, { fields: [companionCaretakers.userId], references: [users.id] })
-}));
-
-export const caretakerShiftsRelations = relations(caretakerShifts, ({ one }) => ({
-	user: one(users, { fields: [caretakerShifts.userId], references: [users.id] })
 }));
 
 export const journalEntriesRelations = relations(journalEntries, ({ one, many }) => ({

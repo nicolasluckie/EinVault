@@ -46,6 +46,7 @@ const messages: Record<keyof Messages, string> = {
 	'enum.activityType.treat': 'Petisco',
 	'enum.activityType.play': 'Brincadeira',
 	'enum.activityType.grooming': 'Higiene',
+	'enum.activityType.threw_up': 'Vomitou',
 	'enum.activityType.other': 'Outro',
 
 	// Enum: Reminder types
@@ -57,8 +58,6 @@ const messages: Record<keyof Messages, string> = {
 
 	// Enum: User roles
 	'enum.role.admin': 'Administrador',
-	'enum.role.member': 'Membro',
-	'enum.role.caretaker': 'Cuidador',
 
 	// Enum: Sex
 	'enum.sex.male': 'Macho',
@@ -468,6 +467,9 @@ const messages: Record<keyof Messages, string> = {
 	'page.companion.edit.labelVetClinic': 'Clínica veterinária',
 	'page.companion.edit.labelEmergencyContact': 'Contacto de emergência',
 	'page.companion.edit.labelEmergencyPhone': 'Telefone',
+	'page.companion.edit.labelEmergencyContact2': 'Contacto de emergência 2',
+	'page.companion.edit.labelEmergencyPhone2': 'Telefone',
+	'page.companion.edit.placeholderEmergencyContact2': 'Jordan (vizinho)',
 	'page.companion.edit.cardSitterNotes': 'Notas para o cuidador',
 	'page.companion.edit.labelNotesForSitter': 'Notas para o cuidador',
 	'page.companion.edit.placeholderFeedingSchedule':
@@ -1016,7 +1018,22 @@ const messages: Record<keyof Messages, string> = {
 	'demo.roleMember': 'Membro',
 	'demo.roleCaretaker': 'Cuidador',
 	'demo.sourceLink': 'Fonte',
-	'demo.writeBlocked': 'Esta demo é somente leitura — sua alteração não foi salva.'
+	'demo.writeBlocked': 'Esta demo é somente leitura — sua alteração não foi salva.',
+
+	// Page: companion edit — sharing tab
+	'page.companion.edit.tabSharing': 'Compartilhar',
+	'page.companion.edit.sectionPublicProfile': 'Perfil público',
+	'page.companion.edit.enablePublicLabel': 'Ativar perfil público',
+	'page.companion.edit.enablePublicHint': 'Qualquer pessoa com o link pode ver este perfil sem fazer login',
+	'page.companion.edit.publicSlugLabel': 'Slug de URL público',
+	'page.companion.edit.publicSlugHint': 'Deixe em branco para usar o nome do companheiro',
+	'page.companion.edit.publicUrlPreview': 'URL pública',
+
+	// Page: public companion profile
+	'page.public.badge': 'Perfil público',
+
+	// Errors: public slug
+	'error.slugTaken': 'Este URL já está sendo usado por outro companheiro'
 
 	// Meta
 } satisfies Record<keyof Messages, string>;

@@ -5,7 +5,6 @@ import { getPaperlessClient, PAPERLESS_DOC_ID_RE } from '$lib/server/storage';
 
 export const GET: RequestHandler = async ({ params, locals }) => {
 	if (!locals.user) error(401, t(locals.locale, 'error.unauthorized'));
-	if (locals.user.role === 'caretaker') error(403, t(locals.locale, 'error.forbidden'));
 
 	const client = getPaperlessClient();
 	if (!client) error(404, t(locals.locale, 'error.notFound'));

@@ -20,7 +20,7 @@ export function parseMood(value: string | null | undefined): Mood | null {
 
 // Daily event type
 
-export type DailyEventType = 'walk' | 'meal' | 'bathroom' | 'treat' | 'play' | 'grooming' | 'other';
+export type DailyEventType = 'walk' | 'meal' | 'bathroom' | 'treat' | 'play' | 'grooming' | 'threw_up' | 'other';
 const DAILY_EVENT_TYPES = [
 	'walk',
 	'meal',
@@ -28,6 +28,7 @@ const DAILY_EVENT_TYPES = [
 	'treat',
 	'play',
 	'grooming',
+	'threw_up',
 	'other'
 ] as const satisfies readonly DailyEventType[];
 

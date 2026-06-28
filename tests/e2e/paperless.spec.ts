@@ -119,14 +119,3 @@ test('search filters documents in the picker', async ({ world, page }) => {
 	});
 	await expect(page.getByRole('button', { name: /vaccination record/i })).toHaveCount(0);
 });
-
-test('caretaker is blocked from the paperless documents API', async ({ world, browser }) => {
-	const ctx = await browser.newContext({ baseURL: world.server.baseURL });
-	const page = await ctx.newPage();
-	await login(page, world.server.baseURL, SEED.caretaker.username);
-
-	const res = await page.request.get(world.server.baseURL + '/api/paperless/documents');
-	expect(res.status()).toBe(403);
-
-	await ctx.close();
-});

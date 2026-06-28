@@ -44,6 +44,7 @@ const messages = {
 	'enum.activityType.treat': 'Treat',
 	'enum.activityType.play': 'Play',
 	'enum.activityType.grooming': 'Grooming',
+	'enum.activityType.threw_up': 'Threw up',
 	'enum.activityType.other': 'Other',
 
 	// Enum: Reminder types
@@ -55,8 +56,6 @@ const messages = {
 
 	// Enum: User roles
 	'enum.role.admin': 'Admin',
-	'enum.role.member': 'Member',
-	'enum.role.caretaker': 'Caretaker',
 
 	// Enum: Sex
 	'enum.sex.male': 'Male',
@@ -104,6 +103,7 @@ const messages = {
 		'Topic may only contain letters, numbers, dashes and underscores (max 64).',
 	'error.invalidDate': 'Invalid date',
 	'error.invalidArchiveDate': 'Invalid archive date.',
+	'error.deleteConfirmMismatch': 'Companion name does not match. Please type the exact name to confirm deletion.',
 	'error.invalidCompanionIds': 'One or more companion IDs are invalid.',
 	'error.invalidBeforeDate': 'Invalid before date',
 	'error.validWeightRequired': 'Valid weight is required.',
@@ -161,6 +161,7 @@ const messages = {
 	'nav.journal': 'Journal',
 	'nav.health': 'Health',
 	'nav.reminders': 'Reminders',
+	'nav.log': 'Log Activity',
 	'nav.documents': 'Documents',
 	'nav.settings': 'Settings',
 	'nav.admin': 'Admin',
@@ -459,6 +460,9 @@ const messages = {
 	'page.companion.edit.labelVetClinic': 'Vet clinic',
 	'page.companion.edit.labelEmergencyContact': 'Emergency contact',
 	'page.companion.edit.labelEmergencyPhone': 'Phone',
+	'page.companion.edit.labelEmergencyContact2': 'Emergency contact 2',
+	'page.companion.edit.labelEmergencyPhone2': 'Phone',
+	'page.companion.edit.placeholderEmergencyContact2': 'Jordan (neighbour)',
 	'page.companion.edit.cardSitterNotes': 'Sitter notes',
 	'page.companion.edit.labelNotesForSitter': 'Notes for caretaker',
 	'page.companion.edit.placeholderFeedingSchedule':
@@ -486,6 +490,14 @@ const messages = {
 	'page.companion.edit.archive': 'Archive',
 	'page.companion.edit.labelArchiveDate': 'Date',
 	'page.companion.edit.labelArchiveNote': 'Note',
+	'page.companion.edit.cardDelete': 'Delete Companion',
+	'page.companion.edit.deleteDescription':
+		'This will permanently delete {name} and all associated data including journal entries, health records, activities, reminders, and documents. This action cannot be undone.',
+	'page.companion.edit.deleteButton': 'Delete {name}',
+	'page.companion.edit.deleting': 'Deleting…',
+	'page.companion.edit.delete': 'Delete',
+	'page.companion.edit.labelDeleteConfirm': 'Type companion name to confirm',
+	'page.companion.edit.placeholderDeleteConfirm': 'Type "{name}" to confirm',
 	'page.companion.edit.tabsAria': 'Edit sections',
 	'page.companion.edit.sectionBasics': 'Basics',
 	'page.companion.edit.sectionAbout': 'About',
@@ -834,24 +846,15 @@ const messages = {
 	'page.admin.twofaReset': '✓ Two-factor reset for this user.',
 
 	// Page: Caretaker log
-	'page.log.title': 'Log activity',
-	'page.log.subtitle': "What's {name} been up to?",
-	'page.log.noActiveShift': 'No active shift',
-	'page.log.noUpcomingShifts': 'No upcoming shifts are scheduled.',
-	'page.log.nextShiftStarts': 'Your next shift starts',
-	'page.log.activityLogged': '✓ Activity logged!',
-	'page.log.alsoLogFor': 'Also Log For…',
-	'page.log.alsoLogForHint': 'Select other companions to record the same activity for.',
-	'page.log.quickLogTitle': 'Quick log',
-	'page.log.activityLabel': 'Activity',
-	'page.log.durationLabel': 'Duration (minutes)',
-	'page.log.whenLabel': 'When',
-	'page.log.notesLabel': 'Notes',
-	'page.log.notesOptional': '(optional)',
-	'page.log.notesPlaceholder': 'e.g. Had a great day and ate all the treats...',
-	'page.log.logButton': 'Log {activity}',
-	'page.log.todaySoFar': 'Today so far',
-	'page.log.nothingLoggedYet': 'Nothing logged yet today.',
+	'page.log.title': 'Log Activity',
+	'page.log.archivedNotice': '{name} is archived. Read-only mode.',
+	'page.log.addEvent': 'Add Event',
+	'page.log.addEventTitle': 'Log a new event',
+	'page.log.eventLabel': 'Event',
+	'page.log.eventPlaceholder': 'What happened?',
+	'page.log.loggedAtLabel': 'Date',
+	'page.log.emptyTitle': 'No events logged yet',
+	'page.log.emptyBody': 'Start tracking {name}\'s daily activities by logging events here.',
 
 	// Page titles (used in <title> tags)
 	'page.care.title': 'Care',
@@ -1002,7 +1005,22 @@ const messages = {
 	'demo.roleMember': 'Member',
 	'demo.roleCaretaker': 'Caretaker',
 	'demo.sourceLink': 'Source',
-	'demo.writeBlocked': "This demo is read-only — your change wasn't saved."
+	'demo.writeBlocked': "This demo is read-only — your change wasn't saved.",
+
+	// Page: companion edit — sharing tab
+	'page.companion.edit.tabSharing': 'Sharing',
+	'page.companion.edit.sectionPublicProfile': 'Public Profile',
+	'page.companion.edit.enablePublicLabel': 'Enable public profile',
+	'page.companion.edit.enablePublicHint': "Anyone with the link can view this companion's profile without logging in",
+	'page.companion.edit.publicSlugLabel': 'Public URL slug',
+	'page.companion.edit.publicSlugHint': "Leave blank to use the companion's name",
+	'page.companion.edit.publicUrlPreview': 'Public URL',
+
+	// Page: public companion profile
+	'page.public.badge': 'Public Profile',
+
+	// Errors: public slug
+	'error.slugTaken': 'This URL is already taken by another companion'
 
 	// Meta
 } as const;

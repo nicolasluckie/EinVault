@@ -20,7 +20,6 @@ export const SEED = {
 	password: 'test-password-123',
 	admin: { id: 'seed-spike', username: 'spike', displayName: 'Spike' },
 	member: { id: 'seed-jet', username: 'jet', displayName: 'Jet' },
-	caretaker: { id: 'seed-faye', username: 'faye', displayName: 'Faye' },
 	resetUser: { id: 'seed-vicious', username: 'vicious', displayName: 'Vicious' },
 	companions: {
 		ein: {
@@ -167,13 +166,6 @@ export function seedUsers(db: BetterSQLite3Database<typeof schema>): void {
 				phone: '(555) 010-7402'
 			},
 			{
-				...SEED.caretaker,
-				passwordHash,
-				role: 'caretaker',
-				email: 'faye@redtail.ship',
-				phone: '(555) 010-0613'
-			},
-			{
 				...SEED.resetUser,
 				passwordHash,
 				role: 'member',
@@ -207,22 +199,8 @@ export function seedContent(
 	const edward = SEED.companions.edward.id;
 	const spike = SEED.admin.id;
 	const jet = SEED.member.id;
-	const faye = SEED.caretaker.id;
-
 	db.insert(schema.companions)
 		.values([{ ...SEED.companions.ein }, { ...SEED.companions.edward }])
-		.run();
-
-	db.insert(schema.companionCaretakers).values({ companionId: ein, userId: faye }).run();
-
-	// Active shift so the caretaker can see their companion.
-	db.insert(schema.caretakerShifts)
-		.values({
-			id: 'seed-shift-active',
-			userId: faye,
-			startAt: new Date(now - 1 * hour),
-			endAt: new Date(now + shiftEndHours * hour)
-		})
 		.run();
 
 	// ---- Reminders: upcoming, overdue, completed, recurring ----
@@ -485,21 +463,21 @@ export function seedContent(
 				durationMinutes: 30,
 				notes: 'Long loop around the block.',
 				loggedAt: new Date(now - 2 * hour),
-				loggedBy: faye
+				loggedBy: jet
 			},
 			{
 				id: 'seed-act-2',
 				companionId: ein,
 				type: 'meal',
 				loggedAt: new Date(now - 5 * hour),
-				loggedBy: faye
+				loggedBy: jet
 			},
 			{
 				id: 'seed-act-3',
 				companionId: ein,
 				type: 'bathroom',
 				loggedAt: new Date(now - 6 * hour),
-				loggedBy: faye
+				loggedBy: jet
 			},
 			{
 				id: 'seed-act-4',
@@ -604,7 +582,7 @@ export function seedContent(
 				date: new Date(now - 3 * day).toISOString().slice(0, 10),
 				body: 'He sat next to me while I worked, placing one paw on the keyboard at key moments. Good notes, honestly.',
 				mood: 'great',
-				loggedBy: faye
+				loggedBy: jet
 			},
 			{
 				id: 'seed-journal-ein-d3',
@@ -620,7 +598,7 @@ export function seedContent(
 				date: new Date(now - 7 * day).toISOString().slice(0, 10),
 				body: 'Met a very serious cat on the morning walk. A long standoff was had. No clear winner.',
 				mood: 'great',
-				loggedBy: faye
+				loggedBy: jet
 			},
 			{
 				id: 'seed-journal-ein-d5',
@@ -813,7 +791,7 @@ export function seedRows(db: BetterSQLite3Database<typeof schema>, opts: { now: 
 }
 
 /**
- * Idempotent: inserts the four demo user rows if they don't already exist.
+ * Idempotent: inserts the three demo user rows if they don't already exist.
  * Safe to call multiple times; skips rows that are already present.
  * Returns the number of rows inserted (0 if already seeded).
  */
@@ -824,7 +802,7 @@ export async function ensureDemoUsers(db: SeedDb): Promise<number> {
 	});
 	if (existing) return 0;
 	seedUsers(db);
-	return 4;
+	return 3;
 }
 
 /**
@@ -847,15 +825,9 @@ export function refreshDemoContent(db: SeedDb, demoMode: boolean, dataDir: strin
 	}
 	const now = Date.now();
 	db.transaction((tx) => {
-		// Explicit deletes for tables that reference both users and companions
-		// (cascade from companions alone would leave orphan rows if user deleted first)
-		tx.delete(schema.caretakerShifts).run();
-		tx.delete(schema.companionCaretakers).run();
 		// companions cascade to: journalEntries -> journalPhotos, healthEvents,
 		// weightEntries, dailyEvents, reminders
 		tx.delete(schema.companions).run();
-		// Shift runs past the 24h reseed interval so the caretaker stays on-shift
-		// for the whole window between refreshes (issue #158).
 		seedContent(tx as never, { now, shiftEndHours: 25 });
 	});
 	copyDemoPhotoFiles(join(dataDir, 'uploads'), now);

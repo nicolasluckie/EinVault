@@ -8,6 +8,7 @@
 		NotebookPen,
 		HeartPulse,
 		Bell,
+		Calendar,
 		Search,
 		LayoutGrid,
 		UserRound,
@@ -32,7 +33,7 @@
 	type User = {
 		id: string;
 		displayName: string;
-		role: 'admin' | 'member' | 'caretaker';
+		role: 'admin';
 		theme: 'light' | 'dark' | 'system';
 		avatarPath?: string | null;
 	};
@@ -84,9 +85,9 @@
 						icon: HeartPulse
 					},
 					{
-						href: `/${activeCompanion.id}/reminders`,
-						label: t(locale, 'nav.reminders'),
-						icon: Bell
+						href: `/${activeCompanion.id}/log`,
+						label: t(locale, 'nav.log'),
+						icon: Calendar
 					}
 				]
 			: []

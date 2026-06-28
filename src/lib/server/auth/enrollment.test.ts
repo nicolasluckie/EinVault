@@ -37,8 +37,8 @@ describe('enrollment', () => {
 
 		const { manualKey } = await beginEnrollment('u1', 'u1');
 
-		const codes = await confirmEnrollment('u1', codeFor(manualKey, baseTs));
-		expect(codes).toHaveLength(10);
+		const confirmed = await confirmEnrollment('u1', codeFor(manualKey, baseTs));
+		expect(confirmed).toBe(true);
 
 		let row = await db.query.users.findFirst({ where: eq(schema.users.id, 'u1') });
 		expect(row?.totpEnabledAt).toBeTruthy();

@@ -25,7 +25,6 @@ const OIDC_ERROR_KEYS = {
 
 export const load: PageServerLoad = async ({ locals, url }) => {
 	if (locals.user) {
-		if (locals.user.role === 'caretaker') redirect(302, '/care');
 		redirect(302, '/');
 	}
 
@@ -86,12 +85,6 @@ export const actions: Actions = {
 			.set({ lastLoginAt: new Date() })
 			.where(eq(schema.users.id, user.id));
 
-		if (user.totpEnabledAt) {
-			const { setPendingMfaCookie } = await import('$lib/server/auth/two-factor');
-			await setPendingMfaCookie(cookies, user.id, isSecureRequest(request));
-			redirect(302, '/auth/2fa');
-		}
-
 		const token = generateSessionToken();
 		const session = await createSession(token, user.id);
 
@@ -101,7 +94,6 @@ export const actions: Actions = {
 			makeSessionCookieOptions(session.expiresAt, isSecureRequest(request))
 		);
 
-		if (user.role === 'caretaker') redirect(302, '/care');
 		redirect(302, '/');
 	}
 };

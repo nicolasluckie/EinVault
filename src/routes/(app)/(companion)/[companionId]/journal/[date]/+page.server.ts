@@ -92,8 +92,6 @@ export const actions: Actions = {
 
 	addActivity: async ({ params, request, locals }) => {
 		if (!locals.user) return fail(401, { error: t(locals.locale, 'error.unauthorized') });
-		if (locals.user.role === 'caretaker')
-			return fail(403, { error: t(locals.locale, 'error.forbidden') });
 		const { companionId, date } = params;
 		if (!isValidDate(date)) return fail(400, { error: t(locals.locale, 'error.invalidDate') });
 
@@ -144,8 +142,6 @@ export const actions: Actions = {
 
 	updateActivity: async ({ request, params, locals }) => {
 		if (!locals.user) return fail(401, { error: t(locals.locale, 'error.unauthorized') });
-		if (locals.user.role === 'caretaker')
-			return fail(403, { error: t(locals.locale, 'error.forbidden') });
 		const { companionId } = params;
 		const data = await request.formData();
 		const id = String(data.get('id') ?? '');
@@ -174,8 +170,6 @@ export const actions: Actions = {
 
 	deleteActivity: async ({ request, params, locals }) => {
 		if (!locals.user) return fail(401, { error: t(locals.locale, 'error.unauthorized') });
-		if (locals.user.role === 'caretaker')
-			return fail(403, { error: t(locals.locale, 'error.forbidden') });
 		const { companionId } = params;
 		const data = await request.formData();
 		const id = String(data.get('id') ?? '');

@@ -16,7 +16,7 @@ async function enableAndGetUrl(page: Page, settingsPath: string): Promise<string
 	return await urlInput.inputValue();
 }
 
-// These tests mutate the shared asMember / asCaretaker user's calendar feed
+// These tests mutate the shared asMember user's calendar feed
 // token (enable/regenerate/disable). Playwright runs a single spec file's tests
 // serially in one worker by default, so they don't collide. Do NOT add
 // describe parallel mode or run this file with --repeat-each across workers:
@@ -85,31 +85,6 @@ test.describe('calendar feed', () => {
 		const ctx = await browser.newContext({ baseURL: app.server.baseURL });
 		const res = await ctx.request.get('/api/shifts/export.ics');
 		expect(res.status()).toBe(404);
-		await ctx.close();
-	});
-
-	test('caretaker feed: enable + fetch with type=shift returns VCALENDAR', async ({
-		asCaretaker,
-		app,
-		browser
-	}) => {
-		const feedUrl = await enableAndGetUrl(asCaretaker, '/care/settings');
-
-		// URL shape
-		expect(feedUrl).toMatch(/\/api\/calendar\/.+\/feed\.ics$/);
-
-		const shiftUrl = feedUrl + '?type=shift';
-		const ctx = await browser.newContext({ baseURL: app.server.baseURL });
-		const res = await ctx.request.get(shiftUrl);
-		expect(res.status()).toBe(200);
-		expect(res.headers()['content-type']).toContain('text/calendar');
-		const body = await res.text();
-		expect(body).toContain('BEGIN:VCALENDAR');
-		expect(body).toContain('END:VCALENDAR');
-
-		// The seeded caretaker has one active shift (started 1h ago, ends 8h from now).
-		// getUpcomingShifts queries endAt >= now, so the active shift is included.
-		expect(body).toContain('BEGIN:VEVENT');
 		await ctx.close();
 	});
 });

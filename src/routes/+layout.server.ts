@@ -24,10 +24,6 @@ export const load: LayoutServerLoad = async ({ locals, url, cookies }) => {
 		return {};
 	}
 
-	if (userCount === 0 && !isSetupRoute) {
-		redirect(302, '/setup');
-	}
-
 	if (userCount > 0 && isSetupRoute) {
 		redirect(302, '/');
 	}

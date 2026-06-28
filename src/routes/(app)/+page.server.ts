@@ -74,8 +74,6 @@ export const load: PageServerLoad = async ({ locals, parent }) => {
 export const actions: Actions = {
 	complete: async ({ request, locals }) => {
 		if (!locals.user) return fail(401, { error: t(locals.locale, 'error.unauthorized') });
-		if (locals.user.role === 'caretaker')
-			return fail(403, { error: t(locals.locale, 'error.forbidden') });
 
 		const data = await request.formData();
 		const id = String(data.get('id') ?? '');

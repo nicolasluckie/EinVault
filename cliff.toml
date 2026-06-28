@@ -17,7 +17,7 @@ body = """
 {% for group, commits in commits | group_by(attribute="group") %}
     ### {{ group | upper_first }}
     {% for commit in commits %}
-        - {% if commit.breaking %}⚠ **BREAKING CHANGE:** {% endif %}{{ commit.message | upper_first }} ([`{{ commit.id | truncate(length=7, end="") }}`](https://github.com/davefatkin/EinVault/commit/{{ commit.id }}))\
+        - {% if commit.breaking %}⚠ **BREAKING CHANGE:** {% endif %}{{ commit.message | upper_first }} ([`{{ commit.id | truncate(length=7, end="") }}`](https://github.com/nicolasluckie/EinVault/commit/{{ commit.id }}))\
     {% endfor %}
 {% endfor %}\n
 """
@@ -29,7 +29,7 @@ conventional_commits = true
 filter_unconventional = true
 split_commits = false
 commit_preprocessors = [
-    { pattern = '\(#([0-9]+)\)', replace = "([#${1}](https://github.com/davefatkin/EinVault/issues/${1}))" },
+    { pattern = '\(#([0-9]+)\)', replace = "([#${1}](https://github.com/nicolasluckie/EinVault/issues/${1}))" },
 ]
 commit_parsers = [
     { message = "^feat", group = "Added" },

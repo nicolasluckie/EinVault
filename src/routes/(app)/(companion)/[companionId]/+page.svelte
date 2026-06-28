@@ -669,6 +669,125 @@
 		</div>
 	</Card>
 
+	<!-- About section -->
+	{#if companion.bio}
+		<section>
+			<h2 class="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">
+				About {companion.name}
+			</h2>
+			<div class="prose prose-sm dark:prose-invert max-w-none">
+				{@html renderMarkdown(companion.bio)}
+			</div>
+		</section>
+	{/if}
+
+	<!-- Schedules section -->
+	{#if companion.feedingSchedule || companion.walkSchedule || companion.medicationSchedule}
+		<section>
+			<h2 class="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-3">
+				Schedules
+			</h2>
+			<div class="flex flex-col sm:flex-row gap-4">
+				{#if companion.feedingSchedule}
+					<div class="flex-1 min-w-0 rounded-xl border border-border bg-card p-4">
+						<p class="text-xs font-semibold text-muted-foreground mb-2 flex items-center gap-1">
+							<span>🍖</span> Feeding Schedule
+						</p>
+						<div class="prose prose-sm dark:prose-invert max-w-none">
+							{@html renderMarkdown(companion.feedingSchedule)}
+						</div>
+					</div>
+				{/if}
+				{#if companion.walkSchedule}
+					<div class="flex-1 min-w-0 rounded-xl border border-border bg-card p-4">
+						<p class="text-xs font-semibold text-muted-foreground mb-2 flex items-center gap-1">
+							<span>🚶</span> Walk Schedule
+						</p>
+						<div class="prose prose-sm dark:prose-invert max-w-none">
+							{@html renderMarkdown(companion.walkSchedule)}
+						</div>
+					</div>
+				{/if}
+				{#if companion.medicationSchedule}
+					<div class="flex-1 min-w-0 rounded-xl border border-border bg-card p-4">
+						<p class="text-xs font-semibold text-muted-foreground mb-2 flex items-center gap-1">
+							<span>💊</span> Medication Schedule
+						</p>
+						<div class="prose prose-sm dark:prose-invert max-w-none">
+							{@html renderMarkdown(companion.medicationSchedule)}
+						</div>
+					</div>
+				{/if}
+			</div>
+		</section>
+	{/if}
+
+	<!-- Notes for Sitter section -->
+	{#if companion.notesForSitter}
+		<section>
+			<h2 class="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">
+				Notes for Sitter
+			</h2>
+			<div class="prose prose-sm dark:prose-invert max-w-none">
+				{@html renderMarkdown(companion.notesForSitter)}
+			</div>
+		</section>
+	{/if}
+
+	<!-- Contacts section -->
+	{#if companion.vetName || companion.vetPhone || companion.vetClinic || companion.emergencyContactName}
+		<section>
+			<h2 class="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-3">
+				Contacts
+			</h2>
+			<div class="flex flex-col sm:flex-row gap-4">
+				{#if companion.vetName || companion.vetPhone || companion.vetClinic}
+					<div class="flex-1 min-w-0 rounded-xl border border-border bg-card p-4 space-y-1 text-sm">
+						<p class="text-xs font-semibold text-muted-foreground mb-2 flex items-center gap-1">
+							<span>🏥</span> Vet Info
+						</p>
+						{#if companion.vetName}
+							<p class="font-medium">{companion.vetName}</p>
+						{/if}
+						{#if companion.vetClinic}
+							<p class="text-muted-foreground">{companion.vetClinic}</p>
+						{/if}
+						{#if companion.vetPhone}
+							<p>📞 <a href="tel:{companion.vetPhone}" class="hover:underline font-medium text-primary-link">{companion.vetPhone}</a></p>
+						{/if}
+					</div>
+				{/if}
+				{#if companion.emergencyContactName || companion.emergencyContactPhone || companion.emergencyContact2Name || companion.emergencyContact2Phone}
+					<div class="flex-1 min-w-0 rounded-xl border border-coral/30 bg-card p-4 space-y-2 text-sm">
+						<p class="text-xs font-semibold text-muted-foreground mb-2 flex items-center gap-1">
+							<span>🚨</span> Emergency Contacts
+						</p>
+						{#if companion.emergencyContactName || companion.emergencyContactPhone}
+							<div class="space-y-1">
+								{#if companion.emergencyContactName}
+									<p class="font-medium">{companion.emergencyContactName}</p>
+								{/if}
+								{#if companion.emergencyContactPhone}
+									<p>📞 <a href="tel:{companion.emergencyContactPhone}" class="hover:underline font-medium text-primary-link">{companion.emergencyContactPhone}</a></p>
+								{/if}
+							</div>
+						{/if}
+						{#if companion.emergencyContact2Name || companion.emergencyContact2Phone}
+							<div class="space-y-1">
+								{#if companion.emergencyContact2Name}
+									<p class="font-medium">{companion.emergencyContact2Name}</p>
+								{/if}
+								{#if companion.emergencyContact2Phone}
+									<p>📞 <a href="tel:{companion.emergencyContact2Phone}" class="hover:underline font-medium text-primary-link">{companion.emergencyContact2Phone}</a></p>
+								{/if}
+							</div>
+						{/if}
+					</div>
+				{/if}
+			</div>
+		</section>
+	{/if}
+
 	<!-- Upcoming reminders card -->
 	<Card>
 		<CardHeader class="pb-3">

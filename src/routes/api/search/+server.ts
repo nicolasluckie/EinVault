@@ -7,7 +7,6 @@ const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 
 export const GET: RequestHandler = async ({ url, locals }) => {
 	if (!locals.user) error(401, t(locals.locale, 'error.unauthorized'));
-	if (locals.user.role === 'caretaker') error(403, t(locals.locale, 'error.forbidden'));
 
 	const p = url.searchParams;
 	const types = p

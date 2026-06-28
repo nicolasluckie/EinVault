@@ -2,54 +2,26 @@ import { error, fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 import { t } from '$lib/i18n';
 import { db, schema } from '$lib/server/db';
-import { eq, and, ne, lt, gt } from 'drizzle-orm';
+import { eq, and, ne } from 'drizzle-orm';
 import { generateId } from '$lib/server/utils';
 import bcrypt from 'bcryptjs';
 import { invalidateAllUserSessions } from '$lib/server/auth/session';
 import { parseRole, EMAIL_RE } from '$lib/server/validation';
-import { getAppSettings, setRequire2fa } from '$lib/server/app-settings';
-import type { Require2fa } from '$lib/server/app-settings';
-import { adminResetTwoFactor } from '$lib/server/auth/enrollment';
-import { isTwoFactorConfigured } from '$lib/server/auth/totp-crypto';
 
 export const load: PageServerLoad = async ({ locals }) => {
 	if (!locals.user) redirect(302, '/auth/login');
 	if (locals.user.role !== 'admin') error(403, t(locals.locale, 'error.forbidden'));
 
-	const rawUsers = await db.query.users.findMany({
+	const users = await db.query.users.findMany({
 		orderBy: (u, { asc }) => [asc(u.createdAt)],
 		columns: {
 			passwordHash: false
 		}
 	});
 
-	const users = rawUsers.map((u) => ({
-		...u,
-		totpEnabled: u.totpEnabledAt != null
-	}));
-
-	const companions = await db.query.companions.findMany({
-		where: eq(schema.companions.isActive, true),
-		orderBy: (c, { asc }) => [asc(c.name)]
-	});
-
-	const assignments = await db.query.companionCaretakers.findMany();
-
-	const shifts = await db.query.caretakerShifts.findMany({
-		orderBy: (s, { asc }) => [asc(s.startAt)]
-	});
-
-	const { require2fa } = await getAppSettings();
-	const twoFactorAvailable = isTwoFactorConfigured();
-
 	return {
 		users,
-		companions,
-		assignments,
-		shifts,
-		currentUserId: locals.user.id,
-		require2fa,
-		twoFactorAvailable
+		currentUserId: locals.user.id
 	};
 };
 
@@ -146,107 +118,6 @@ export const actions: Actions = {
 		return { resetSuccess: true };
 	},
 
-	addShift: async ({ request, locals }) => {
-		if (locals.user?.role !== 'admin') error(403, t(locals.locale, 'error.forbidden'));
-
-		const data = await request.formData();
-		const userId = String(data.get('userId') ?? '');
-		const startAt = new Date(String(data.get('startAt') ?? ''));
-		const endAt = new Date(String(data.get('endAt') ?? ''));
-		const notes = String(data.get('notes') ?? '').trim() || null;
-
-		if (!userId) return fail(400, { shiftError: t(locals.locale, 'error.missingUserId') });
-		if (isNaN(startAt.getTime()))
-			return fail(400, { shiftError: t(locals.locale, 'error.validStartTimeRequired') });
-		if (isNaN(endAt.getTime()))
-			return fail(400, { shiftError: t(locals.locale, 'error.validEndTimeRequired') });
-		if (endAt <= startAt)
-			return fail(400, { shiftError: t(locals.locale, 'error.endTimeAfterStartTime') });
-
-		const user = await db.query.users.findFirst({ where: eq(schema.users.id, userId) });
-		if (!user || user.role !== 'caretaker') {
-			return fail(400, { shiftError: t(locals.locale, 'error.userNotCaretaker') });
-		}
-
-		const overlapping = await db.query.caretakerShifts.findFirst({
-			where: and(
-				eq(schema.caretakerShifts.userId, userId),
-				lt(schema.caretakerShifts.startAt, endAt),
-				gt(schema.caretakerShifts.endAt, startAt)
-			),
-			columns: { id: true }
-		});
-		if (overlapping)
-			return fail(400, {
-				shiftError: t(locals.locale, 'error.shiftOverlap')
-			});
-
-		await db.insert(schema.caretakerShifts).values({
-			id: generateId(15),
-			userId,
-			startAt,
-			endAt,
-			notes
-		});
-
-		return { shiftAddSuccess: true };
-	},
-
-	updateShift: async ({ request, locals }) => {
-		if (locals.user?.role !== 'admin') error(403, t(locals.locale, 'error.forbidden'));
-
-		const data = await request.formData();
-		const shiftId = String(data.get('shiftId') ?? '');
-		const startAt = new Date(String(data.get('startAt') ?? ''));
-		const endAt = new Date(String(data.get('endAt') ?? ''));
-		const notes = String(data.get('notes') ?? '').trim() || null;
-
-		if (!shiftId) return fail(400, { shiftError: t(locals.locale, 'error.missingShiftId') });
-		if (isNaN(startAt.getTime()))
-			return fail(400, { shiftError: t(locals.locale, 'error.validStartTimeRequired') });
-		if (isNaN(endAt.getTime()))
-			return fail(400, { shiftError: t(locals.locale, 'error.validEndTimeRequired') });
-		if (endAt <= startAt)
-			return fail(400, { shiftError: t(locals.locale, 'error.endTimeAfterStartTime') });
-
-		const existingShift = await db.query.caretakerShifts.findFirst({
-			where: eq(schema.caretakerShifts.id, shiftId)
-		});
-		if (!existingShift) return fail(404, { shiftError: t(locals.locale, 'error.shiftNotFound') });
-
-		const overlapping = await db.query.caretakerShifts.findFirst({
-			where: and(
-				eq(schema.caretakerShifts.userId, existingShift.userId),
-				ne(schema.caretakerShifts.id, shiftId),
-				lt(schema.caretakerShifts.startAt, endAt),
-				gt(schema.caretakerShifts.endAt, startAt)
-			),
-			columns: { id: true }
-		});
-		if (overlapping)
-			return fail(400, {
-				shiftError: t(locals.locale, 'error.shiftOverlap')
-			});
-
-		await db
-			.update(schema.caretakerShifts)
-			.set({ startAt, endAt, notes })
-			.where(eq(schema.caretakerShifts.id, shiftId));
-
-		return { shiftUpdateSuccess: true };
-	},
-
-	deleteShift: async ({ request, locals }) => {
-		if (locals.user?.role !== 'admin') error(403, t(locals.locale, 'error.forbidden'));
-
-		const data = await request.formData();
-		const shiftId = String(data.get('shiftId') ?? '');
-		if (!shiftId) return fail(400, { shiftError: t(locals.locale, 'error.missingShiftId') });
-
-		await db.delete(schema.caretakerShifts).where(eq(schema.caretakerShifts.id, shiftId));
-		return { shiftDeleteSuccess: true };
-	},
-
 	editUser: async ({ request, locals }) => {
 		if (locals.user?.role !== 'admin') error(403, t(locals.locale, 'error.forbidden'));
 
@@ -305,71 +176,5 @@ export const actions: Actions = {
 		}
 
 		return { editSuccess: true };
-	},
-
-	setRequire2fa: async ({ request, locals }) => {
-		if (locals.user?.role !== 'admin') error(403, t(locals.locale, 'error.forbidden'));
-
-		const data = await request.formData();
-		const value = String(data.get('value') ?? '');
-
-		if (value !== 'off' && value !== 'admins' && value !== 'everyone') {
-			return fail(400, { require2faError: 'Invalid value.' });
-		}
-
-		await setRequire2fa(value as Require2fa, locals.user.id);
-		return { require2faSuccess: true };
-	},
-
-	resetTwoFactor: async ({ request, locals }) => {
-		if (locals.user?.role !== 'admin') error(403, t(locals.locale, 'error.forbidden'));
-
-		const data = await request.formData();
-		const userId = String(data.get('userId') ?? '');
-
-		if (!userId) return fail(400, { twofaResetError: t(locals.locale, 'error.missingUserId') });
-
-		await adminResetTwoFactor(userId);
-		return { twofaResetSuccess: true };
-	},
-
-	assignCompanions: async ({ request, locals }) => {
-		if (locals.user?.role !== 'admin') error(403, t(locals.locale, 'error.forbidden'));
-
-		const data = await request.formData();
-		const userId = String(data.get('userId') ?? '');
-		const companionIds = data.getAll('companionId').map(String);
-
-		if (!userId) return fail(400, { assignError: t(locals.locale, 'error.missingUserId') });
-
-		const user = await db.query.users.findFirst({ where: eq(schema.users.id, userId) });
-		if (!user || user.role !== 'caretaker') {
-			return fail(400, { assignError: t(locals.locale, 'error.userNotCaretaker') });
-		}
-
-		if (companionIds.length > 0) {
-			const validCompanions = await db.query.companions.findMany({
-				where: eq(schema.companions.isActive, true),
-				columns: { id: true }
-			});
-			const validIds = new Set(validCompanions.map((c) => c.id));
-			const allValid = companionIds.every((id) => validIds.has(id));
-			if (!allValid)
-				return fail(400, { assignError: t(locals.locale, 'error.invalidCompanionIds') });
-		}
-
-		db.transaction((tx) => {
-			tx.delete(schema.companionCaretakers)
-				.where(eq(schema.companionCaretakers.userId, userId))
-				.run();
-
-			if (companionIds.length > 0) {
-				tx.insert(schema.companionCaretakers)
-					.values(companionIds.map((companionId) => ({ companionId, userId })))
-					.run();
-			}
-		});
-
-		return { assignSuccess: true };
 	}
 };
