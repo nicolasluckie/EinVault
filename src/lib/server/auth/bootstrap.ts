@@ -20,7 +20,8 @@ export async function bootstrapAdminUser(): Promise<string> {
 
 	if (existing) {
 		// Check if password changed by comparing against stored hash
-		const passwordChanged = !existing.passwordHash || !(await bcrypt.compare(ADMIN_PASSWORD, existing.passwordHash));
+		const passwordChanged =
+			!existing.passwordHash || !(await bcrypt.compare(ADMIN_PASSWORD, existing.passwordHash));
 
 		if (passwordChanged) {
 			const newHash = await bcrypt.hash(ADMIN_PASSWORD, 12);

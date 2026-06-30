@@ -6,10 +6,12 @@
 type AuthUser = { id: string; role: 'admin' } | null | undefined;
 
 /**
- * Users can modify (edit caption, delete) any journal media item they uploaded.
- * Items with a null `loggedBy` (pre-migration legacy rows) are modifiable by any user.
+ * Admins can modify any journal media item.
+ * Non-admins can modify only items they uploaded; items with a null `loggedBy`
+ * (pre-migration legacy rows) are restricted to admins.
  */
 export function canModifyMedia(user: AuthUser, item: { loggedBy: string | null }): boolean {
 	if (!user) return false;
-	return item.loggedBy === null || item.loggedBy === user.id;
+	if (user.role === 'admin') return true;
+	return item.loggedBy !== null && item.loggedBy === user.id;
 }

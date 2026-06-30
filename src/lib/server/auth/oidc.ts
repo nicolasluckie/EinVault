@@ -143,10 +143,7 @@ export function isAdminGroupsConfigured(): boolean {
 // - Otherwise clamps the passed role to a non-admin role: keeps 'caretaker'/'member',
 //   demotes 'admin' (caller is responsible for skipping the call entirely if admin
 //   groups aren't configured and the existing role should be preserved).
-export function evaluateRole(
-	claims: client.IDToken,
-	_fallbackRole: string
-): 'admin' {
+export function evaluateRole(claims: client.IDToken, _fallbackRole: string): 'admin' {
 	const adminGroups = env.OIDC_ADMIN_GROUPS;
 	if (adminGroups) {
 		const configured = adminGroups

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { PageData, ActionData } from './$types';
+	import type { PageData } from './$types';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import { Input } from '$lib/components/ui/input/index.js';
 	import { Textarea } from '$lib/components/ui/textarea/index.js';
@@ -16,7 +16,7 @@
 
 	const locale = getLocale();
 
-	let { data, form }: { data: PageData; form: ActionData } = $props();
+	let { data }: { data: PageData } = $props();
 
 	let companion = $derived(data.companion);
 	let events = $derived(data.events);
@@ -101,7 +101,7 @@
 						onclick={() => {
 							showAddForm = false;
 							newType = '';
-									newNotes = '';
+							newNotes = '';
 							newLoggedAt = today;
 						}}
 					>
@@ -129,7 +129,9 @@
 				<div class="p-4 flex items-start justify-between gap-4">
 					<div class="flex-1 min-w-0">
 						<div class="flex items-center gap-2">
-							<span class="text-lg">{ACTIVITY_TYPES.find(at => at.value === event.type)?.icon || '📝'}</span>
+							<span class="text-lg"
+								>{ACTIVITY_TYPES.find((at) => at.value === event.type)?.icon || '📝'}</span
+							>
 							<span class="text-sm font-medium">{activityLabel(locale, event.type)}</span>
 						</div>
 						{#if event.notes}

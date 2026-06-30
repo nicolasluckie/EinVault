@@ -1,16 +1,13 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { tick } from 'svelte';
-	import LocalTime from '$lib/components/LocalTime.svelte';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import { Input } from '$lib/components/ui/input/index.js';
 	import { Label } from '$lib/components/ui/label/index.js';
 	import { Badge } from '$lib/components/ui/badge/index.js';
-	import { Select } from '$lib/components/ui/select/index.js';
 	import { Alert, AlertDescription } from '$lib/components/ui/alert/index.js';
-	import { Trash2, X } from '@lucide/svelte';
+	import { X } from '@lucide/svelte';
 	import ConfirmDialog from '$lib/components/ConfirmDialog.svelte';
-	import { localDatetimes } from '$lib/actions/localDatetimes';
 	import { t, getLocale } from '$lib/i18n';
 
 	interface UserRow {
@@ -23,42 +20,18 @@
 		isActive: boolean;
 		totpEnabled: boolean;
 	}
-	interface CompanionRow {
-		id: string;
-		name: string;
-		breed: string | null;
-	}
-	interface AssignmentRow {
-		userId: string;
-		companionId: string;
-	}
-	interface ShiftRow {
-		id: string;
-		userId: string;
-		startAt: Date | string;
-		endAt: Date | string;
-		notes: string | null;
-	}
-
 	let {
 		user,
-		companions,
-		assignments,
-		shifts,
 		currentUserId,
 		onclose
 	}: {
 		user: UserRow;
-		companions: CompanionRow[];
-		assignments: AssignmentRow[];
-		shifts: ShiftRow[];
 		currentUserId: string;
 		onclose: () => void;
 	} = $props();
 
 	const locale = getLocale();
 
-	let editingShiftId = $state<string | null>(null);
 	let confirmOpen = $state(false);
 	let deleteShiftId = $state('');
 	let deleteShiftForm = $state<HTMLFormElement | null>(null);
@@ -76,24 +49,8 @@
 	}
 
 	let dialogEl = $state<HTMLElement | null>(null);
-	let assignedIds = $derived(
-		assignments.filter((a) => a.userId === user.id).map((a) => a.companionId)
-	);
-	let userShifts = $derived(shifts.filter((s) => s.userId === user.id));
-
-	let selectedCompanionIds = $state<string[]>([]);
-	$effect(() => {
-		void user.id; // re-run when the drawer opens for a different user
-		selectedCompanionIds = [...assignedIds];
-	});
 
 	const roleBadge = { admin: 'primary' } as const;
-
-	function localDatetimeISO(d: Date | string) {
-		const dt = new Date(d);
-		const p = (n: number) => String(n).padStart(2, '0');
-		return `${dt.getFullYear()}-${p(dt.getMonth() + 1)}-${p(dt.getDate())}T${p(dt.getHours())}:${p(dt.getMinutes())}`;
-	}
 
 	let triggerEl: HTMLElement | null = null;
 	let didFocus = false;

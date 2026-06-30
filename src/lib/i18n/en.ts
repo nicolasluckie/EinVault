@@ -103,7 +103,8 @@ const messages = {
 		'Topic may only contain letters, numbers, dashes and underscores (max 64).',
 	'error.invalidDate': 'Invalid date',
 	'error.invalidArchiveDate': 'Invalid archive date.',
-	'error.deleteConfirmMismatch': 'Companion name does not match. Please type the exact name to confirm deletion.',
+	'error.deleteConfirmMismatch':
+		'Companion name does not match. Please type the exact name to confirm deletion.',
 	'error.invalidCompanionIds': 'One or more companion IDs are invalid.',
 	'error.invalidBeforeDate': 'Invalid before date',
 	'error.validWeightRequired': 'Valid weight is required.',
@@ -854,7 +855,7 @@ const messages = {
 	'page.log.eventPlaceholder': 'What happened?',
 	'page.log.loggedAtLabel': 'Date',
 	'page.log.emptyTitle': 'No events logged yet',
-	'page.log.emptyBody': 'Start tracking {name}\'s daily activities by logging events here.',
+	'page.log.emptyBody': "Start tracking {name}'s daily activities by logging events here.",
 
 	// Page titles (used in <title> tags)
 	'page.care.title': 'Care',
@@ -1011,7 +1012,8 @@ const messages = {
 	'page.companion.edit.tabSharing': 'Sharing',
 	'page.companion.edit.sectionPublicProfile': 'Public Profile',
 	'page.companion.edit.enablePublicLabel': 'Enable public profile',
-	'page.companion.edit.enablePublicHint': "Anyone with the link can view this companion's profile without logging in",
+	'page.companion.edit.enablePublicHint':
+		"Anyone with the link can view this companion's profile without logging in",
 	'page.companion.edit.publicSlugLabel': 'Public URL slug',
 	'page.companion.edit.publicSlugHint': "Leave blank to use the companion's name",
 	'page.companion.edit.publicUrlPreview': 'Public URL',

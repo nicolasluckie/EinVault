@@ -91,24 +91,6 @@ function justPast(): string {
 }
 
 /**
- * A datetime-local string for a time ~9 hours from now. The seed DB has an
- * active shift from -1h to +8h; the new test shift must start after +8h to
- * avoid an overlap conflict while still being within the 24h lead window.
- */
-function inNineHours(): string {
-	const d = new Date(Date.now() + 9 * 60 * 60 * 1000);
-	const pad = (n: number) => String(n).padStart(2, '0');
-	return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
-}
-
-/** Ten hours from now — end of a shift that starts in nine hours. */
-function inTenHours(): string {
-	const d = new Date(Date.now() + 10 * 60 * 60 * 1000);
-	const pad = (n: number) => String(n).padStart(2, '0');
-	return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
-}
-
-/**
  * Save notification settings via a fetch to the SvelteKit action. Playwright's
  * `page.evaluate` runs inside the browser context so the session cookie is
  * automatically included — no CSRF workaround needed.

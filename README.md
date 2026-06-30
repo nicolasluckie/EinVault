@@ -1,4 +1,5 @@
 <a name="readme-top"></a>
+
 <p align="center">
   <img src="docs/ein.svg" alt="Ein, the EinVault mascot" width="120" />
 </p>
@@ -36,15 +37,15 @@
 
 ## Tech Stack
 
-| Layer | Technology |
-|-------|-----------|
-| Frontend | SvelteKit, Svelte, TypeScript, Tailwind CSS |
-| Backend | Node.js, SvelteKit server |
-| Database | SQLite, Drizzle ORM |
-| Deployment | Docker |
-| Testing | Vitest, Playwright |
-| Linting | ESLint, Prettier |
-| Changelog | git-cliff |
+| Layer      | Technology                                  |
+| ---------- | ------------------------------------------- |
+| Frontend   | SvelteKit, Svelte, TypeScript, Tailwind CSS |
+| Backend    | Node.js, SvelteKit server                   |
+| Database   | SQLite, Drizzle ORM                         |
+| Deployment | Docker                                      |
+| Testing    | Vitest, Playwright                          |
+| Linting    | ESLint, Prettier                            |
+| Changelog  | git-cliff                                   |
 
 ---
 
@@ -59,24 +60,28 @@
 ### Installation
 
 1. Clone the repo:
+
    ```bash
    git clone https://github.com/yourorg/EinVault.git
    cd EinVault
    ```
 
 2. Install dependencies:
+
    ```bash
    npm install
    ```
 
 3. Configure environment variables:
    1. Copy the example environment file:
+
    ```bash
    cp .env.example .env
    ```
    2. Edit `.env` and set `ADMIN_USERNAME` and `ADMIN_PASSWORD`
 
 4. Create data directory and apply database migrations:
+
    ```bash
    mkdir -p data
    npm run db:generate
@@ -94,19 +99,19 @@ The app will be available at `http://localhost:5173`.
 
 ## Available Scripts
 
-| Script | Description |
-|--------|-------------|
-| `npm run dev` | Start development server at http://localhost:5173 |
-| `npm run build` | Build for production |
-| `npm run check` | SvelteKit type checking |
-| `npm run lint` | ESLint + Prettier check |
-| `npm run format` | Auto-format with Prettier |
-| `npm run test:unit` | Unit tests (Vitest) |
-| `npm run test:e2e` | End-to-end tests (Playwright, builds the app first) |
-| `npm test` | Run both unit and e2e tests |
-| `npm run db:generate` | Generate a migration file after schema changes |
-| `npm run db:migrate` | Apply pending migrations |
-| `npm run db:studio` | Drizzle Studio (visual database browser) |
+| Script                | Description                                         |
+| --------------------- | --------------------------------------------------- |
+| `npm run dev`         | Start development server at http://localhost:5173   |
+| `npm run build`       | Build for production                                |
+| `npm run check`       | SvelteKit type checking                             |
+| `npm run lint`        | ESLint + Prettier check                             |
+| `npm run format`      | Auto-format with Prettier                           |
+| `npm run test:unit`   | Unit tests (Vitest)                                 |
+| `npm run test:e2e`    | End-to-end tests (Playwright, builds the app first) |
+| `npm test`            | Run both unit and e2e tests                         |
+| `npm run db:generate` | Generate a migration file after schema changes      |
+| `npm run db:migrate`  | Apply pending migrations                            |
+| `npm run db:studio`   | Drizzle Studio (visual database browser)            |
 
 ---
 
@@ -170,25 +175,26 @@ All the same env vars work here. `ORIGIN` defaults to `http://localhost:3000` so
 
 ## Environment Variables
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `ORIGIN` | Your public domain for production | `http://localhost:3000` |
-| `TZ` | Container timezone | `UTC` |
-| `UPLOAD_MAX_MB` | Maximum size in MB for image uploads | `10` |
-| `VIDEO_MAX_MB` | Maximum size in MB for journal video uploads | `100` |
-| `MAX_DAILY_MEDIA` | Maximum number of journal photos and videos per companion per day | `5` |
-| `MAX_DOCUMENTS_PER_COMPANION` | Maximum number of documents stored per companion | `200` |
-| `REMINDER_UNDO_SECONDS` | Default undo window (seconds) when dismissing a Reminder | `7` |
-| `CALENDAR_FEED_HISTORY_DAYS` | Days of past events the calendar feed includes | `90` |
-| `CALENDAR_FEED_ENABLED` | Set `false` to disable the calendar feed endpoint | `true` |
-| `DEMO_MODE` | Enable read-only public demo mode | `false` |
-| `DATABASE_URL` | Database path inside the container | `/data/einvault.db` |
-| `ADMIN_USERNAME` | Admin username for login | — |
-| `ADMIN_PASSWORD` | Admin password (plaintext, hashed automatically at startup) | — |
+| Variable                      | Description                                                       | Default                 |
+| ----------------------------- | ----------------------------------------------------------------- | ----------------------- |
+| `ORIGIN`                      | Your public domain for production                                 | `http://localhost:3000` |
+| `TZ`                          | Container timezone                                                | `UTC`                   |
+| `UPLOAD_MAX_MB`               | Maximum size in MB for image uploads                              | `10`                    |
+| `VIDEO_MAX_MB`                | Maximum size in MB for journal video uploads                      | `100`                   |
+| `MAX_DAILY_MEDIA`             | Maximum number of journal photos and videos per companion per day | `5`                     |
+| `MAX_DOCUMENTS_PER_COMPANION` | Maximum number of documents stored per companion                  | `200`                   |
+| `REMINDER_UNDO_SECONDS`       | Default undo window (seconds) when dismissing a Reminder          | `7`                     |
+| `CALENDAR_FEED_HISTORY_DAYS`  | Days of past events the calendar feed includes                    | `90`                    |
+| `CALENDAR_FEED_ENABLED`       | Set `false` to disable the calendar feed endpoint                 | `true`                  |
+| `DEMO_MODE`                   | Enable read-only public demo mode                                 | `false`                 |
+| `DATABASE_URL`                | Database path inside the container                                | `/data/einvault.db`     |
+| `ADMIN_USERNAME`              | Admin username for login                                          | —                       |
+| `ADMIN_PASSWORD`              | Admin password (plaintext, hashed automatically at startup)       | —                       |
 
 ### Optional Integrations
 
 **Video Transcoding:**
+
 - `VIDEO_TRANSCODE` — Enable background transcoding of uploaded videos to web-playable MP4
 - `VIDEO_KEEP_ORIGINAL` — Keep original source file alongside transcoded copy
 - `VIDEO_TRANSCODE_MAX_MB` — Skip transcoding for inputs larger than this
@@ -197,6 +203,7 @@ All the same env vars work here. `ORIGIN` defaults to `http://localhost:3000` so
 - `VIDEO_FFPROBE_PATH` — Absolute path to ffprobe binary
 
 **S3 Storage:**
+
 - `STORAGE_BACKEND` — `local` or `s3`
 - `S3_ENDPOINT` — Full endpoint URL
 - `S3_BUCKET` — Bucket name
@@ -207,16 +214,19 @@ All the same env vars work here. `ORIGIN` defaults to `http://localhost:3000` so
 - `S3_PRESIGN_TTL_SECONDS` — Lifetime of presigned download URLs
 
 **Immich:**
+
 - `IMMICH_URL` — Base URL of your Immich server
 - `IMMICH_API_KEY` — API key with asset.read, asset.view permissions
 - `IMMICH_ALBUM_ID` — Optional album ID to limit picker
 
 **Paperless-ngx:**
+
 - `PAPERLESS_URL` — Base URL of your Paperless-ngx instance
 - `PAPERLESS_API_TOKEN` — API token
 - `PAPERLESS_TAG_ID` — Optional tag ID to limit picker
 
 **SMTP Email:**
+
 - `SMTP_HOST` — SMTP server hostname
 - `SMTP_PORT` — SMTP port (default 587)
 - `SMTP_SECURE` — `true` for implicit TLS (port 465)
@@ -225,11 +235,13 @@ All the same env vars work here. `ORIGIN` defaults to `http://localhost:3000` so
 - `SMTP_FROM` — RFC 5322 From address
 
 **ntfy Push Notifications:**
+
 - `NTFY_URL` — ntfy server base URL
 - `NTFY_TOKEN` — Bearer token for self-hosted ntfy servers
 - `NOTIFY_SCAN_INTERVAL_MS` — Notification scheduler scan interval
 
 **OIDC / SSO:**
+
 - `OIDC_ISSUER_URL` — IdP base URL
 - `OIDC_CLIENT_ID` — Client ID
 - `OIDC_CLIENT_SECRET` — Client secret
@@ -247,12 +259,11 @@ All the same env vars work here. `ORIGIN` defaults to `http://localhost:3000` so
 
 ## Development
 
-Install pre-commit hooks to enforce commit message conventions and code quality:
+Git hooks are managed by husky and installed automatically via `npm install` (the `prepare` script runs `husky install`). Hooks enforce:
 
-```bash
-pip install pre-commit
-pre-commit install
-```
+- **pre-commit**: lint-staged runs Prettier and ESLint on staged files
+- **commit-msg**: commitlint validates commit message format
+- **pre-push**: unit tests run before pushing to remote
 
 Commits follow [Conventional Commits](https://www.conventionalcommits.org/). See [AGENTS.md](AGENTS.md) for the full specification (type, scope, and examples).
 

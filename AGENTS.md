@@ -17,48 +17,49 @@ This is required for automated CHANGELOG generation via git-cliff.
 ```
 
 - **Subject line**: imperative mood, lowercase after the colon, no trailing period, ≤72 chars
-- **Body**: explain *what* and *why*, not *how*; separate from subject with a blank line
+- **Body**: explain _what_ and _why_, not _how_; separate from subject with a blank line
 - **Breaking changes**: add `BREAKING CHANGE: <description>` in the footer, or append `!` after the type: `feat(api)!: rename endpoint`
 
 ---
 
 ## Types
 
-| Type | Use for | Appears in CHANGELOG? |
-|------|---------|----------------------|
-| `feat` | New user-facing features | ✅ Added |
-| `fix` | Bug fixes | ✅ Fixed |
-| `refactor` | Code restructuring, no behaviour change | ✅ Changed |
-| `perf` | Performance improvements | ✅ Changed |
-| `docs` | Documentation only | ✅ Changed |
-| `test` | Adding or updating tests | ❌ |
-| `chore` | Maintenance, deps, tooling | ❌ |
-| `ci` | CI/CD pipeline changes | ❌ |
-| `style` | Formatting, whitespace | ❌ |
-| `build` | Build system changes | ❌ |
+| Type       | Use for                                 | Appears in CHANGELOG? |
+| ---------- | --------------------------------------- | --------------------- |
+| `feat`     | New user-facing features                | ✅ Added              |
+| `fix`      | Bug fixes                               | ✅ Fixed              |
+| `refactor` | Code restructuring, no behaviour change | ✅ Changed            |
+| `perf`     | Performance improvements                | ✅ Changed            |
+| `docs`     | Documentation only                      | ✅ Changed            |
+| `test`     | Adding or updating tests                | ❌                    |
+| `chore`    | Maintenance, deps, tooling              | ❌                    |
+| `ci`       | CI/CD pipeline changes                  | ❌                    |
+| `style`    | Formatting, whitespace                  | ❌                    |
+| `build`    | Build system changes                    | ❌                    |
 
 ---
 
 ## Scopes (optional but encouraged)
 
-| Scope | Covers |
-|-------|--------|
-| `auth` | Authentication, sessions, enrollment |
-| `companions` | Companion management |
-| `care` | Care log, care status |
-| `media` | Photo/file uploads, Immich integration |
-| `notifications` | ntfy, email alerts |
-| `db` | Schema, migrations |
-| `web` | Routes, UI components |
-| `config` | Environment/settings |
-| `ci` | GitHub Actions workflows |
-| `deps` | Dependency updates |
+| Scope           | Covers                                 |
+| --------------- | -------------------------------------- |
+| `auth`          | Authentication, sessions, enrollment   |
+| `companions`    | Companion management                   |
+| `care`          | Care log, care status                  |
+| `media`         | Photo/file uploads, Immich integration |
+| `notifications` | ntfy, email alerts                     |
+| `db`            | Schema, migrations                     |
+| `web`           | Routes, UI components                  |
+| `config`        | Environment/settings                   |
+| `ci`            | GitHub Actions workflows               |
+| `deps`          | Dependency updates                     |
 
 ---
 
 ## Examples
 
 **Good:**
+
 ```
 feat(auth): add 2FA setup flow with TOTP
 fix(care): handle missing care status without crashing
@@ -69,6 +70,7 @@ test(auth): add unit tests for session validation
 ```
 
 **Bad:**
+
 ```
 Updated stuff                   # no type, vague
 fix: Fixed the bug              # capitalised after colon, past tense

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { t, getLocale } from '$lib/i18n';
 
-	let { currentRole, showNotice }: { currentRole: string; showNotice: boolean } = $props();
+	let { showNotice }: { showNotice: boolean } = $props();
 
 	const locale = getLocale();
 	let toast = $state(false);

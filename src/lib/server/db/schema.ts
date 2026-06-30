@@ -1,13 +1,5 @@
 import { sql, relations } from 'drizzle-orm';
-import {
-	integer,
-	sqliteTable,
-	text,
-	uniqueIndex,
-	index,
-	real,
-	primaryKey
-} from 'drizzle-orm/sqlite-core';
+import { integer, sqliteTable, text, uniqueIndex, index, real } from 'drizzle-orm/sqlite-core';
 
 // users
 

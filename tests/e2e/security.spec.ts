@@ -1,9 +1,6 @@
 import { test, expect } from '../lib/fixtures';
 import { SEED } from '../lib/seed';
-import { pngUpload } from '../lib/files';
-
 const EIN = SEED.companions.ein.id;
-const EDWARD = SEED.companions.edward.id;
 
 test.describe('security headers', () => {
 	test('page response carries required security headers', async ({ app, browser }) => {

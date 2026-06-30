@@ -72,27 +72,27 @@ describe('evaluateRole', () => {
 		expect(evaluateRole(claims('admins'), 'member')).toBe('admin');
 	});
 
-	it('demotes an existing admin when no configured group matches', () => {
+	it('returns admin when no configured group matches (admin-only model)', () => {
 		process.env.OIDC_ADMIN_GROUPS = 'admins';
-		expect(evaluateRole(claims(['users']), 'admin')).toBe('member');
+		expect(evaluateRole(claims(['users']), 'admin')).toBe('admin');
 	});
 
-	it('demotes an existing admin when the groups claim is missing', () => {
+	it('returns admin when the groups claim is missing (admin-only model)', () => {
 		process.env.OIDC_ADMIN_GROUPS = 'admins';
-		expect(evaluateRole(claims(), 'admin')).toBe('member');
+		expect(evaluateRole(claims(), 'admin')).toBe('admin');
 	});
 
-	it('preserves caretaker regardless of groups', () => {
+	it('returns admin regardless of fallback role (admin-only model)', () => {
 		process.env.OIDC_ADMIN_GROUPS = 'admins';
-		expect(evaluateRole(claims(['users']), 'caretaker')).toBe('caretaker');
+		expect(evaluateRole(claims(['users']), 'caretaker')).toBe('admin');
 	});
 
-	it('never grants admin from the fallback role alone', () => {
-		expect(evaluateRole(claims(['admins']), 'admin')).toBe('member');
+	it('returns admin when no OIDC_ADMIN_GROUPS configured', () => {
+		expect(evaluateRole(claims(['admins']), 'admin')).toBe('admin');
 	});
 
-	it('ignores a non-array, non-string groups claim', () => {
+	it('returns admin when groups claim is non-array non-string (admin-only model)', () => {
 		process.env.OIDC_ADMIN_GROUPS = 'admins';
-		expect(evaluateRole(claims({ nested: 'admins' }), 'member')).toBe('member');
+		expect(evaluateRole(claims({ nested: 'admins' }), 'member')).toBe('admin');
 	});
 });

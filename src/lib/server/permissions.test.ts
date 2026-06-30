@@ -19,9 +19,11 @@ async function statusOf(p: Promise<void>): Promise<number | 'ok'> {
 
 describe('assertCanEditCompanion', () => {
 	beforeAll(async () => {
-		await db.insert(schema.users).values([
-			{ id: 'adm', username: 'adm', displayName: 'A', role: 'admin' }
-		] as (typeof schema.users.$inferInsert)[]);
+		await db
+			.insert(schema.users)
+			.values([
+				{ id: 'adm', username: 'adm', displayName: 'A', role: 'admin' }
+			] as (typeof schema.users.$inferInsert)[]);
 	});
 
 	it('401 for anonymous', async () => {

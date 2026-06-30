@@ -21,7 +21,6 @@ import { isDemoBlockedRequest } from '$lib/server/demo';
 import { DATA_DIR } from '$lib/server/paths';
 import { recoverAndStart } from '$lib/server/video/worker';
 import { startNotifyScheduler } from '$lib/server/notify/scheduler';
-import { getAppSettings } from '$lib/server/app-settings';
 import { bootstrapAdminUser } from '$lib/server/auth/bootstrap';
 
 logOidcBootStatus();
@@ -206,9 +205,4 @@ const localeDetect: Handle = async ({ event, resolve }) => {
 	});
 };
 
-export const handle = sequence(
-	securityHeaders,
-	authContext,
-	demoReadOnly,
-	localeDetect
-);
+export const handle = sequence(securityHeaders, authContext, demoReadOnly, localeDetect);

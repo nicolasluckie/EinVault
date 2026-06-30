@@ -23,7 +23,10 @@ export const GET: RequestHandler = async ({ params, locals, request, url }) => {
 		if (err instanceof Error && err.message.includes('escapes upload root')) {
 			error(403, t(locals.locale, 'error.forbidden'));
 		}
-		console.error(`[public/avatars] storage error provider=${companion.avatarProvider} key=${key}:`, err);
+		console.error(
+			`[public/avatars] storage error provider=${companion.avatarProvider} key=${key}:`,
+			err
+		);
 		error(502, t(locals.locale, 'error.fileNotFound'));
 	}
 	if (!res) error(404, t(locals.locale, 'error.fileNotFound'));

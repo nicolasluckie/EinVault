@@ -1029,16 +1029,17 @@ const messages: Record<keyof Messages, string> = {
 	'page.companion.edit.tabSharing': 'Partage',
 	'page.companion.edit.sectionPublicProfile': 'Profil public',
 	'page.companion.edit.enablePublicLabel': 'Activer le profil public',
-	'page.companion.edit.enablePublicHint': "N'importe qui avec le lien peut voir ce profil sans se connecter",
+	'page.companion.edit.enablePublicHint':
+		"N'importe qui avec le lien peut voir ce profil sans se connecter",
 	'page.companion.edit.publicSlugLabel': 'Slug URL public',
-	'page.companion.edit.publicSlugHint': "Laisser vide pour utiliser le nom du compagnon",
+	'page.companion.edit.publicSlugHint': 'Laisser vide pour utiliser le nom du compagnon',
 	'page.companion.edit.publicUrlPreview': 'URL publique',
 
 	// Page: public companion profile
 	'page.public.badge': 'Profil public',
 
 	// Errors: public slug
-	'error.slugTaken': "Cette URL est déjà utilisée par un autre compagnon"
+	'error.slugTaken': 'Cette URL est déjà utilisée par un autre compagnon'
 
 	// Meta
 } satisfies Record<keyof Messages, string>;

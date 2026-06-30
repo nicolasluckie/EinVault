@@ -113,7 +113,10 @@ export const GET: RequestHandler = async ({ url, cookies, locals, request, getCl
 	const adminGroupsConfigured = isAdminGroupsConfigured();
 
 	// Linking algorithm — synchronous transaction.
-	type TxResult = { kind: 'ok'; userId: string; role: 'admin' } | { kind: 'disabled' } | { kind: 'not_provisioned' };
+	type TxResult =
+		| { kind: 'ok'; userId: string; role: 'admin' }
+		| { kind: 'disabled' }
+		| { kind: 'not_provisioned' };
 
 	const txResult: TxResult = db.transaction((tx) => {
 		// 1. Find by OIDC subject.
@@ -240,7 +243,7 @@ export const GET: RequestHandler = async ({ url, cookies, locals, request, getCl
 		redirect(302, '/auth/login?error=oidc_not_provisioned');
 	}
 
-	const { userId, role } = txResult;
+	const { userId } = txResult;
 
 	const token = generateSessionToken();
 	const session = await createSession(token, userId, { oidcIdTokenHint: idToken });

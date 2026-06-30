@@ -173,9 +173,9 @@ test('demo hides the app version in the footer', async ({ world, page }) => {
 	await expect(footer.getByText('Source Code', { exact: true })).toBeVisible();
 });
 
-// ─── 3. Demo bar visible and role switch works ────────────────────────────────
+// ─── 3. Demo bar visible ──────────────────────────────────────────────────────
 
-test('demo bar is visible and role switch works', async ({ world, page }) => {
+test('demo bar is visible', async ({ world, page }) => {
 	await page.goto(world.server.baseURL + '/auth/login');
 	await page.getByRole('button', { name: /Explore as Admin/i }).click();
 	await expect(page).not.toHaveURL(/auth\/login/, { timeout: 10_000 });
@@ -183,16 +183,9 @@ test('demo bar is visible and role switch works', async ({ world, page }) => {
 	// Demo bar must be present (contains "Viewing as" text)
 	await expect(page.getByText(/Viewing as/i)).toBeVisible({ timeout: 8_000 });
 
-	// Switch to member role via the select
+	// Only admin role is available in admin-only mode
 	const roleSelect = page.locator('#demo-role');
-	await roleSelect.selectOption('member');
-
-	// Page should reload as member — still on app (not /care)
-	await expect(page).not.toHaveURL(/\/care/, { timeout: 10_000 });
-	await expect(page).not.toHaveURL(/auth\/login/, { timeout: 10_000 });
-
-	// Demo bar still visible after role switch
-	await expect(page.getByText(/Viewing as/i)).toBeVisible({ timeout: 8_000 });
+	await expect(roleSelect).toHaveValue('admin');
 });
 
 // ─── 4. Write is blocked with read-only notice ────────────────────────────────

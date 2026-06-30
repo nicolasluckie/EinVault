@@ -22,14 +22,8 @@
 	let archiving = $state(false);
 	let deleting = $state(false);
 	let activeTab = $state<'profile' | 'caretaker' | 'sharing'>('profile');
-	let publicEnabledState = $state(false);
-	$effect(() => {
-		publicEnabledState = companion.publicEnabled ?? false;
-	});
-	let currentOrigin = $state('');
-	$effect(() => {
-		currentOrigin = window.location.origin;
-	});
+	let publicEnabledState = $derived(companion.publicEnabled ?? false);
+	let currentOrigin = $derived(typeof window !== 'undefined' ? window.location.origin : '');
 	const locale = getLocale();
 
 	let showArchivePanel = $state(false);
@@ -493,8 +487,14 @@
 						</p>
 					</div>
 					<div class="rounded-lg bg-muted/60 px-3 py-2 text-xs text-muted-foreground break-all">
-						<span class="font-medium text-foreground">{t(locale, 'page.companion.edit.publicUrlPreview')}:</span>
-						{currentOrigin}/p/{companion.publicSlug ?? companion.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')}
+						<span class="font-medium text-foreground"
+							>{t(locale, 'page.companion.edit.publicUrlPreview')}:</span
+						>
+						{currentOrigin}/p/{companion.publicSlug ??
+							companion.name
+								.toLowerCase()
+								.replace(/\s+/g, '-')
+								.replace(/[^a-z0-9-]/g, '')}
 					</div>
 				{/if}
 			</section>
@@ -625,13 +625,17 @@
 						class="space-y-4"
 					>
 						<div class="space-y-1.5">
-							<Label for="deleteConfirm">{t(locale, 'page.companion.edit.labelDeleteConfirm')}</Label>
+							<Label for="deleteConfirm"
+								>{t(locale, 'page.companion.edit.labelDeleteConfirm')}</Label
+							>
 							<Input
 								id="deleteConfirm"
 								name="deleteConfirm"
 								type="text"
 								autocomplete="off"
-								placeholder={t(locale, 'page.companion.edit.placeholderDeleteConfirm', { name: companion.name })}
+								placeholder={t(locale, 'page.companion.edit.placeholderDeleteConfirm', {
+									name: companion.name
+								})}
 							/>
 						</div>
 						<div class="flex gap-2">

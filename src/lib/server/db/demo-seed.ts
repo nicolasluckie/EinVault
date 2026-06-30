@@ -193,6 +193,7 @@ export function seedContent(
 	// shift a test adds for tomorrow. The demo refresh path passes a value that
 	// covers its 24h reseed interval so visitors never land on the off-shift
 	// experience between refreshes (issue #158).
+	// eslint-disable-next-line no-unused-vars
 	const shiftEndHours = opts.shiftEndHours ?? 8;
 
 	const ein = SEED.companions.ein.id;

@@ -753,12 +753,19 @@
 							<p class="text-muted-foreground">{companion.vetClinic}</p>
 						{/if}
 						{#if companion.vetPhone}
-							<p>📞 <a href="tel:{companion.vetPhone}" class="hover:underline font-medium text-primary-link">{companion.vetPhone}</a></p>
+							<p>
+								📞 <a
+									href="tel:{companion.vetPhone}"
+									class="hover:underline font-medium text-primary-link">{companion.vetPhone}</a
+								>
+							</p>
 						{/if}
 					</div>
 				{/if}
 				{#if companion.emergencyContactName || companion.emergencyContactPhone || companion.emergencyContact2Name || companion.emergencyContact2Phone}
-					<div class="flex-1 min-w-0 rounded-xl border border-coral/30 bg-card p-4 space-y-2 text-sm">
+					<div
+						class="flex-1 min-w-0 rounded-xl border border-coral/30 bg-card p-4 space-y-2 text-sm"
+					>
 						<p class="text-xs font-semibold text-muted-foreground mb-2 flex items-center gap-1">
 							<span>🚨</span> Emergency Contacts
 						</p>
@@ -768,7 +775,13 @@
 									<p class="font-medium">{companion.emergencyContactName}</p>
 								{/if}
 								{#if companion.emergencyContactPhone}
-									<p>📞 <a href="tel:{companion.emergencyContactPhone}" class="hover:underline font-medium text-primary-link">{companion.emergencyContactPhone}</a></p>
+									<p>
+										📞 <a
+											href="tel:{companion.emergencyContactPhone}"
+											class="hover:underline font-medium text-primary-link"
+											>{companion.emergencyContactPhone}</a
+										>
+									</p>
 								{/if}
 							</div>
 						{/if}
@@ -778,7 +791,13 @@
 									<p class="font-medium">{companion.emergencyContact2Name}</p>
 								{/if}
 								{#if companion.emergencyContact2Phone}
-									<p>📞 <a href="tel:{companion.emergencyContact2Phone}" class="hover:underline font-medium text-primary-link">{companion.emergencyContact2Phone}</a></p>
+									<p>
+										📞 <a
+											href="tel:{companion.emergencyContact2Phone}"
+											class="hover:underline font-medium text-primary-link"
+											>{companion.emergencyContact2Phone}</a
+										>
+									</p>
 								{/if}
 							</div>
 						{/if}

@@ -11,7 +11,6 @@ import { isAllowedVideoMime, looksLikeVideo, videoExtFromMime } from '$lib/serve
 import { demuxerForMime, transcodeAvailable } from '$lib/server/video/transcode';
 import { kickWorker } from '$lib/server/video/worker';
 import { canModifyMedia } from '$lib/permissions';
-import { assertCanEditCompanion } from '$lib/server/permissions';
 import { isValidDate } from '$lib/server/validation';
 
 const MAX_IMAGE_SIZE = UPLOAD_MAX_MB * 1024 * 1024;

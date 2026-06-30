@@ -1,8 +1,8 @@
-import { error, fail, redirect } from '@sveltejs/kit';
+import { fail, redirect } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
 import { t } from '$lib/i18n';
 import { db, schema } from '$lib/server/db';
-import { eq, and, desc } from 'drizzle-orm';
+import { eq, and } from 'drizzle-orm';
 import { localDateISO } from '$lib/date';
 import { parseDailyEventType } from '$lib/server/validation';
 
@@ -60,7 +60,10 @@ export const actions: Actions = {
 		if (!id) return fail(400, { error: t(locals.locale, 'error.missingId') });
 
 		const existing = await db.query.dailyEvents.findFirst({
-			where: and(eq(schema.dailyEvents.id, id), eq(schema.dailyEvents.companionId, params.companionId))
+			where: and(
+				eq(schema.dailyEvents.id, id),
+				eq(schema.dailyEvents.companionId, params.companionId)
+			)
 		});
 		if (!existing) return fail(404, { error: t(locals.locale, 'error.eventNotFound') });
 

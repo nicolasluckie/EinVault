@@ -85,7 +85,9 @@ export function healthTypeOptions(locale: Locale) {
 }
 
 export function activityTypeOptions(locale: Locale) {
-	return (['walk', 'meal', 'bathroom', 'treat', 'play', 'grooming', 'threw_up', 'other'] as const).map((v) => ({
+	return (
+		['walk', 'meal', 'bathroom', 'treat', 'play', 'grooming', 'threw_up', 'other'] as const
+	).map((v) => ({
 		value: v,
 		icon: ACTIVITY_ICONS[v],
 		label: activityLabel(locale, v),

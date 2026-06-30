@@ -16,9 +16,12 @@
 		"db:studio": "drizzle-kit studio",
 		"test:unit": "svelte-kit sync && vitest run",
 		"test:e2e": "playwright test",
-		"test": "npm run test:unit && npm run test:e2e"
+		"test": "npm run test:unit && npm run test:e2e",
+		"prepare": "husky"
 	},
 	"devDependencies": {
+		"@commitlint/cli": "^21.1.0",
+		"@commitlint/config-conventional": "^21.1.0",
 		"@eslint/js": "^10.0.1",
 		"@playwright/test": "^1.60.0",
 		"@sveltejs/adapter-node": "^5.5.4",
@@ -37,7 +40,9 @@
 		"eslint": "^10.1.0",
 		"eslint-config-prettier": "^10.1.8",
 		"eslint-plugin-svelte": "^3.16.0",
+		"husky": "^9.1.7",
 		"ical.js": "^2.2.1",
+		"lint-staged": "^17.0.8",
 		"mailparser": "^3.9.9",
 		"oauth2-mock-server": "^8.2.3",
 		"prettier": "^3.8.1",
@@ -80,5 +85,9 @@
 	"overrides": {
 		"cookie": "^0.7.0",
 		"esbuild": "^0.28.1"
+	},
+	"lint-staged": {
+		"*.{js,ts,svelte,json,md,yaml,yml,css}": "prettier --check",
+		"*.{js,ts,svelte}": "eslint"
 	}
 }

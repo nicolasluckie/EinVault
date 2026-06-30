@@ -1021,7 +1021,8 @@ const messages: Record<keyof Messages, string> = {
 	'page.companion.edit.tabSharing': 'Condivisione',
 	'page.companion.edit.sectionPublicProfile': 'Profilo pubblico',
 	'page.companion.edit.enablePublicLabel': 'Abilita profilo pubblico',
-	'page.companion.edit.enablePublicHint': 'Chiunque abbia il link può vedere questo profilo senza accedere',
+	'page.companion.edit.enablePublicHint':
+		'Chiunque abbia il link può vedere questo profilo senza accedere',
 	'page.companion.edit.publicSlugLabel': 'Slug URL pubblico',
 	'page.companion.edit.publicSlugHint': 'Lascia vuoto per usare il nome del compagno',
 	'page.companion.edit.publicUrlPreview': 'URL pubblico',

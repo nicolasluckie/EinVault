@@ -1027,7 +1027,8 @@ const messages: Record<keyof Messages, string> = {
 	'page.companion.edit.tabSharing': 'Teilen',
 	'page.companion.edit.sectionPublicProfile': 'Öffentliches Profil',
 	'page.companion.edit.enablePublicLabel': 'Öffentliches Profil aktivieren',
-	'page.companion.edit.enablePublicHint': 'Jeder mit dem Link kann dieses Profil ohne Anmeldung ansehen',
+	'page.companion.edit.enablePublicHint':
+		'Jeder mit dem Link kann dieses Profil ohne Anmeldung ansehen',
 	'page.companion.edit.publicSlugLabel': 'Öffentlicher URL-Slug',
 	'page.companion.edit.publicSlugHint': 'Leer lassen, um den Namen des Begleiters zu verwenden',
 	'page.companion.edit.publicUrlPreview': 'Öffentliche URL',

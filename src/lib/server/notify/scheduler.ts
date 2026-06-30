@@ -239,14 +239,18 @@ async function drain(): Promise<void> {
 				if (row.payload.kind === 'reminderDue') {
 					await deliverReminder(row, row.payload);
 				} else {
-					console.error(`[notify] unknown payload kind '${row.payload.kind}'; skipping row ${row.id}`);
+					console.error(
+						`[notify] unknown payload kind '${row.payload.kind}'; skipping row ${row.id}`
+					);
 					await markSkipped(row.id);
 				}
 			} else if (row.channel === 'ntfy') {
 				if (row.payload.kind === 'reminderDue') {
 					await deliverReminderNtfy(row, row.payload);
 				} else {
-					console.error(`[notify] unknown payload kind '${row.payload.kind}'; skipping row ${row.id}`);
+					console.error(
+						`[notify] unknown payload kind '${row.payload.kind}'; skipping row ${row.id}`
+					);
 					await markSkipped(row.id);
 				}
 			} else {
