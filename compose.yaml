@@ -1,8 +1,54 @@
+# EinVault — Unified Docker Compose
+# Development (default): builds from local Dockerfile
+# Production: docker compose --profile prod up -d (pulls from GHCR with security hardening)
+#
+# Usage:
+#   Development: docker compose up -d --build
+#   Production:  docker compose --profile prod up -d
+#
+# Environment variables: see .env.example for full documentation
+
 services:
+  # Development profile (default) — builds from local Dockerfile
   einvault:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: einvault:dev
+    container_name: einvault-dev
+    restart: unless-stopped
+    profiles:
+      - dev
+
+    ports:
+      - '127.0.0.1:${EINVAULT_PORT:-3000}:3000'
+
+    volumes:
+      - ${EINVAULT_DATA:-./data}:/data
+
+    user: '${PUID:-1000}:${PGID:-1000}'
+
+    environment:
+      ORIGIN: ${ORIGIN:-http://localhost:3000}
+      NODE_ENV: production
+      DATABASE_URL: /data/einvault.db
+      UPLOAD_MAX_MB: ${UPLOAD_MAX_MB:-10}
+      VIDEO_MAX_MB: ${VIDEO_MAX_MB:-100}
+      MAX_DAILY_MEDIA: ${MAX_DAILY_MEDIA:-5}
+      MAX_DOCUMENTS_PER_COMPANION: ${MAX_DOCUMENTS_PER_COMPANION:-200}
+      REMINDER_UNDO_SECONDS: ${REMINDER_UNDO_SECONDS:-7}
+      # Additional env vars: see .env.example
+
+  # Production profile — pulls from GHCR with security hardening
+  einvault-prod:
+    image: ghcr.io/nicolasluckie/einvault:latest
     container_name: einvault
     restart: unless-stopped
+    profiles:
+      - prod
+
+    ports:
+      - '127.0.0.1:3000:3000'
 
     volumes:
       - ./data:/data
@@ -10,17 +56,31 @@ services:
     user: '1000:1000'
 
     environment:
-      ORIGIN: https://einvault.example.com
+      ORIGIN: ${ORIGIN}
       NODE_ENV: production
       DATABASE_URL: /data/einvault.db
-      UPLOAD_MAX_MB: 100
-      VIDEO_MAX_MB: 250
-      MAX_DAILY_MEDIA: 10
-      MAX_DOCUMENTS_PER_COMPANION: 200
-      REMINDER_UNDO_SECONDS: 10
-      # Admin credentials
-      ADMIN_USERNAME: admin
-      ADMIN_PASSWORD:
+      UPLOAD_MAX_MB: ${UPLOAD_MAX_MB:-10}
+      VIDEO_MAX_MB: ${VIDEO_MAX_MB:-100}
+      MAX_DAILY_MEDIA: ${MAX_DAILY_MEDIA:-5}
+      MAX_DOCUMENTS_PER_COMPANION: ${MAX_DOCUMENTS_PER_COMPANION:-200}
+      REMINDER_UNDO_SECONDS: ${REMINDER_UNDO_SECONDS:-7}
+      # Additional env vars: see .env.example
+
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    read_only: true
+    tmpfs:
+      - /tmp:mode=1777,size=64m
+
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+        reservations:
+          memory: 64M
 
     healthcheck:
       test: ['CMD', 'wget', '-qO-', 'http://127.0.0.1:3000/api/health']
@@ -28,10 +88,3 @@ services:
       timeout: 5s
       retries: 3
       start_period: 15s
-
-    networks:
-      - einvault_net
-
-networks:
-  einvault_net:
-    external: true

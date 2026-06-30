@@ -130,8 +130,7 @@ EinVault/
 │   ├── fakes/            # Fake implementations for external services
 │   └── lib/              # Test utilities and fixtures
 ├── drizzle/              # Database migrations
-├── docker-compose.prod.yml   # Production Docker Compose config
-├── docker-compose.dev.yml    # Development Docker Compose config
+├── compose.yaml          # Unified Docker Compose config (dev/prod profiles)
 ├── cliff.toml               # git-cliff changelog configuration
 ├── AGENTS.md                # AI agent commit message rules
 ├── CHANGELOG.md             # Auto-generated changelog
@@ -142,23 +141,21 @@ EinVault/
 
 ## Docker
 
-### Production Deployment
-
 Requires Docker Engine 24+, Docker Compose v2, and a reverse proxy for TLS (Caddy, Nginx, Traefik, or similar).
 
-Download [`docker-compose.prod.yml`](docker-compose.prod.yml) and set your domain before starting:
+### Production Deployment
 
-**`ORIGIN`** — your public domain:
-
-```yaml
-ORIGIN: https://einvault.yourdomain.com
-```
-
-Then:
+Set your domain in an `.env` file or pass it directly:
 
 ```bash
 mkdir -p ./data
-docker compose -f docker-compose.prod.yml up -d
+docker compose --profile prod up -d
+```
+
+**`ORIGIN`** — your public domain (required for production):
+
+```bash
+ORIGIN=https://einvault.yourdomain.com docker compose --profile prod up -d
 ```
 
 ### Local Build
@@ -166,10 +163,10 @@ docker compose -f docker-compose.prod.yml up -d
 Builds the image locally instead of pulling from GHCR. Useful for testing Dockerfile changes or working on EinVault itself:
 
 ```bash
-docker compose -f docker-compose.dev.yml up -d --build
+docker compose up -d --build
 ```
 
-All the same env vars work here. `ORIGIN` defaults to `http://localhost:3000` so no `.env` is needed for a basic smoke test.
+`ORIGIN` defaults to `http://localhost:3000` for local development. See `.env.example` for all available environment variables.
 
 ---
 
