@@ -69,7 +69,7 @@ async function apiUploadMedia(
 }
 
 test('oversized upload is rejected with fileTooLarge', async ({ world, page }) => {
-	await login(page, world.server.baseURL, SEED.member.username);
+	await login(page, world.server.baseURL, SEED.admin.username);
 
 	// Build a buffer just over 1 MB that starts with valid PNG magic bytes.
 	// The handler checks file.size > MAX_IMAGE_SIZE (1 * 1024 * 1024) before
@@ -83,7 +83,7 @@ test('oversized upload is rejected with fileTooLarge', async ({ world, page }) =
 });
 
 test('daily media cap rejects the third upload', async ({ world, page }) => {
-	await login(page, world.server.baseURL, SEED.member.username);
+	await login(page, world.server.baseURL, SEED.admin.username);
 
 	const date = '2026-06-11';
 	const mediaData = PNG_BYTES;

@@ -58,6 +58,13 @@ jobs:
           git add tests/badge.svg
           git diff --cached --quiet || git commit -m "chore(ci): update test badge [skip ci]"
           git push
+      - run: npm run test:unit:coverage
+      - name: Upload coverage reports
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: coverage
+          path: coverage/
+          retention-days: 7
 
   build:
     runs-on: ubuntu-latest

@@ -149,8 +149,9 @@ test('oidc-variants: admin group membership grants admin role', async ({ page })
 });
 
 // ─── Test 4: group absence demotes to member ───────────────────────────────
+// SKIPPED: Admin-only model has no member role to demote to
 
-test('oidc-variants: group absence demotes admin to member', async ({ page }) => {
+test.skip('oidc-variants: group absence demotes admin to member', async ({ page }) => {
 	const world = await bootOidcWorld('admin-group-demote', {
 		OIDC_ALLOW_SIGNUP: 'true',
 		OIDC_ADMIN_GROUPS: 'einvault-admins'

@@ -63,7 +63,7 @@ const EIN_DOCS_URL = `/${SEED.companions.ein.id}/documents`;
 test('picker lists tagged docs and imports one', async ({ world, page }) => {
 	world.fake.setDocuments(DOCS);
 
-	await login(page, world.server.baseURL, SEED.member.username);
+	await login(page, world.server.baseURL, SEED.admin.username);
 	await page.goto(world.server.baseURL + EIN_DOCS_URL);
 
 	// Open the picker
@@ -98,7 +98,7 @@ test('picker lists tagged docs and imports one', async ({ world, page }) => {
 test('search filters documents in the picker', async ({ world, page }) => {
 	world.fake.setDocuments(DOCS);
 
-	await login(page, world.server.baseURL, SEED.member.username);
+	await login(page, world.server.baseURL, SEED.admin.username);
 	await page.goto(world.server.baseURL + EIN_DOCS_URL);
 
 	await page.getByRole('button', { name: /add from paperless/i }).click();

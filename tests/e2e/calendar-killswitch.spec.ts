@@ -35,7 +35,7 @@ test('CALENDAR_FEED_ENABLED=false hides the settings card and 404s the feed', as
 	page
 }) => {
 	await page.goto(server.baseURL + '/auth/login');
-	await page.getByLabel('Username').fill(SEED.member.username);
+	await page.getByLabel('Username').fill(SEED.admin.username);
 	await page.getByLabel('Password').fill(SEED.password);
 	await page.getByRole('button', { name: 'Sign in' }).click();
 	await expect(page).not.toHaveURL(/auth\/login/, { timeout: 8_000 });

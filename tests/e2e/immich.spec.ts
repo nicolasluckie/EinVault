@@ -68,7 +68,7 @@ const EIN_ID = SEED.companions.ein.id;
 test('avatar from Immich', async ({ world, page }) => {
 	world.fake.setAssets(ASSETS);
 
-	await login(page, world.server.baseURL, SEED.member.username);
+	await login(page, world.server.baseURL, SEED.admin.username);
 	await page.goto(world.server.baseURL + `/companions/${EIN_ID}/edit`);
 
 	// The editable companion avatar lives on the edit form. Its Immich button
@@ -102,7 +102,7 @@ test('avatar from Immich', async ({ world, page }) => {
 test('journal photo from Immich', async ({ world, page }) => {
 	world.fake.setAssets(ASSETS);
 
-	await login(page, world.server.baseURL, SEED.member.username);
+	await login(page, world.server.baseURL, SEED.admin.username);
 	await page.goto(world.server.baseURL + `/${EIN_ID}/journal/2026-06-01`);
 
 	// The "Pick from Immich" button is in the Photos section header

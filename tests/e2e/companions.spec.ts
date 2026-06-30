@@ -19,62 +19,62 @@ async function createCompanion(
 }
 
 test.describe('companion crud', () => {
-	test('member creates a companion', async ({ asMember }) => {
-		const id = await createCompanion(asMember, 'e2e-comp-create');
+	test('admin creates a companion', async ({ asAdmin }) => {
+		const id = await createCompanion(asAdmin, 'e2e-comp-create');
 		// Should have landed on the companion dashboard page
-		await expect(asMember).toHaveURL(new RegExp(id));
+		await expect(asAdmin).toHaveURL(new RegExp(id));
 		// The companion name should be visible in the page heading (not a hidden dropdown option)
-		await expect(asMember.locator('h1').filter({ hasText: 'e2e-comp-create' })).toBeVisible();
+		await expect(asAdmin.locator('h1').filter({ hasText: 'e2e-comp-create' })).toBeVisible();
 	});
 
-	test('edit persists breed', async ({ asMember }) => {
-		const id = await createCompanion(asMember, 'e2e-comp-edit');
+	test('edit persists breed', async ({ asAdmin }) => {
+		const id = await createCompanion(asAdmin, 'e2e-comp-edit');
 
-		await asMember.goto(`/companions/${id}/edit`);
-		await asMember.locator('#breed').fill('e2e-breed');
-		await asMember.getByRole('button', { name: 'Save Changes' }).click();
+		await asAdmin.goto(`/companions/${id}/edit`);
+		await asAdmin.locator('#breed').fill('e2e-breed');
+		await asAdmin.getByRole('button', { name: 'Save Changes' }).click();
 
 		// After save the page stays on the edit page and shows a success toast
-		await expect(asMember.getByText('Changes saved.')).toBeVisible({ timeout: 8_000 });
+		await expect(asAdmin.getByText('Changes saved.')).toBeVisible({ timeout: 8_000 });
 
 		// Reload and confirm the value is persisted
-		await asMember.goto(`/companions/${id}/edit`);
-		await expect(asMember.locator('#breed')).toHaveValue('e2e-breed');
+		await asAdmin.goto(`/companions/${id}/edit`);
+		await expect(asAdmin.locator('#breed')).toHaveValue('e2e-breed');
 	});
 
-	test('edit persists second emergency contact', async ({ asMember }) => {
-		const id = await createCompanion(asMember, 'e2e-comp-emergency2');
+	test('edit persists second emergency contact', async ({ asAdmin }) => {
+		const id = await createCompanion(asAdmin, 'e2e-comp-emergency2');
 
-		await asMember.goto(`/companions/${id}/edit`);
+		await asAdmin.goto(`/companions/${id}/edit`);
 		// Switch to Caretaker tab
-		await asMember.getByRole('button', { name: 'Caretaker info' }).click();
+		await asAdmin.getByRole('button', { name: 'Caretaker info' }).click();
 		// Fill in second emergency contact
-		await asMember.locator('#emergencyContact2Name').fill('Jordan');
-		await asMember.locator('#emergencyContact2Phone').fill('555-0199');
-		await asMember.getByRole('button', { name: 'Save Changes' }).click();
+		await asAdmin.locator('#emergencyContact2Name').fill('Jordan');
+		await asAdmin.locator('#emergencyContact2Phone').fill('555-0199');
+		await asAdmin.getByRole('button', { name: 'Save Changes' }).click();
 
 		// After save the page stays on the edit page and shows a success toast
-		await expect(asMember.getByText('Changes saved.')).toBeVisible({ timeout: 8_000 });
+		await expect(asAdmin.getByText('Changes saved.')).toBeVisible({ timeout: 8_000 });
 
 		// Reload and confirm the values are persisted
-		await asMember.goto(`/companions/${id}/edit`);
-		await asMember.getByRole('button', { name: 'Caretaker info' }).click();
-		await expect(asMember.locator('#emergencyContact2Name')).toHaveValue('Jordan');
-		await expect(asMember.locator('#emergencyContact2Phone')).toHaveValue('555-0199');
+		await asAdmin.goto(`/companions/${id}/edit`);
+		await asAdmin.getByRole('button', { name: 'Caretaker info' }).click();
+		await expect(asAdmin.locator('#emergencyContact2Name')).toHaveValue('Jordan');
+		await expect(asAdmin.locator('#emergencyContact2Phone')).toHaveValue('555-0199');
 	});
 
-	test('empty name is rejected', async ({ asMember }) => {
-		await asMember.goto('/companions/new');
+	test('empty name is rejected', async ({ asAdmin }) => {
+		await asAdmin.goto('/companions/new');
 
 		// The #name input has HTML `required`; clicking submit without filling it
 		// triggers browser validation and never navigates away.
-		await asMember.getByRole('button', { name: 'Add Companion' }).click();
+		await asAdmin.getByRole('button', { name: 'Add Companion' }).click();
 
 		// URL must still be on /companions/new — no redirect to a companion page
-		await expect(asMember).toHaveURL(/\/companions\/new/);
+		await expect(asAdmin).toHaveURL(/\/companions\/new/);
 
 		// The name input should be invalid per the browser constraint API
-		const nameInput = asMember.locator('#name');
+		const nameInput = asAdmin.locator('#name');
 		const validity = await nameInput.evaluate((el) => (el as HTMLInputElement).validity.valid);
 		expect(validity).toBe(false);
 	});
